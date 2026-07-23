@@ -76,6 +76,7 @@ dependencies = [
     "djangorestframework",
     "drf-spectacular",
     "psycopg",
+    "Pillow",
     "redis",
 ]
 

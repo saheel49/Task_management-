@@ -68,7 +68,7 @@ USER django
 # gunicorn, psycopg[c], whitenoise). Cached on the dependency files alone.
 COPY --chown=django:django uv.lock pyproject.toml ./
 RUN --mount=type=cache,target=/tmp/uv-cache,uid=$MY_UID,gid=$MY_GID \
-    uv sync --frozen --no-dev --group prod
+    uv sync --no-dev --group prod
 
 # Copy the application source.
 COPY --chown=django:django . /code/
