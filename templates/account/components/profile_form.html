@@ -5,7 +5,16 @@
 
     <div id="profile-picture" class="basis-1/4 shrink-0">
         <div class="bg-base-100 rounded-xl shadow-lg p-6 text-center">
-            <h3 class="text-xl font-bold">
+            <label for="profile-upload" class="cursor-pointer">
+                <img
+                    id="avatar-preview"
+                    class="avatar rounded-full w-40 h-40 mx-auto border-4 border-primary object-cover transition hover:scale-105 hover:opacity-80"
+                    src="{{ user.avatar_url }}"
+                    alt="Profile Picture"
+                >
+            </label>
+
+            <h3 class="mt-4 text-xl font-bold">
                 {{ user.get_full_name|default:user.username }}
             </h3>
 
@@ -75,3 +84,42 @@
     </div>
 
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const uploadInput = document.getElementById("profile-upload");
+    const avatarPreview = document.getElementById("avatar-preview");
+
+    if (!uploadInput || !avatarPreview) {
+        return;
+    }
+
+    uploadInput.addEventListener("change", function () {
+        const file = this.files[0];
+
+        if (!file) {
+            return;
+        }
+
+        if (!file.type.startsWith("image/")) {
+            alert("Please select a valid image.");
+            this.value = "";
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            alert("Image must be smaller than 5 MB.");
+            this.value = "";
+            return;
+        }
+
+        const reader = new FileReader();
+
+        reader.onload = function(e){
+            avatarPreview.src = e.target.result;
+        };
+
+        reader.readAsDataURL(file);
+    });
+});
+</script>
