@@ -34,19 +34,15 @@ class Command(StaticfilesRunserverCommand):
         password = os.environ.get("DEV_SUPERUSER_PASSWORD", "admin")
 
         user_model = get_user_model()
-        username_field = user_model.USERNAME_FIELD
 
         try:
-            # The allauth adapter stores the email in the username field, so match on
-            # both to reliably detect an existing dev account.
-            if user_model.objects.filter(email__iexact=email).exists() or (
-                username_field != "email" and user_model.objects.filter(**{f"{username_field}__iexact": email}).exists()
-            ):
+            if user_model.objects.filter(email__iexact=email).exists():
+                return
+
+            if user_model.objects.filter(username__iexact=email).exists():
                 return
 
             create_kwargs = {"email": email, "password": password}
-            if username_field != "email":
-                create_kwargs[username_field] = email
             user_model.objects.create_superuser(**create_kwargs)
         except OperationalError, ProgrammingError:
             # Database isn't migrated yet — skip quietly; `make migrate` will set it up.

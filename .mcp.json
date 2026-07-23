@@ -10,7 +10,7 @@
         "mcp-alchemy"
       ],
       "env": {
-        "DB_URL": "sqlite:////Users/ca/ChrisDevCode/repos/django-starter/db.sqlite3"
+        "DB_URL": "sqlite:////Users/ca/ChrisDevCode/repos/task-manager/db.sqlite3"
       }
     },
     "playwright": {

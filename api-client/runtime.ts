@@ -1,8 +1,8 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
- * django-template
- * my django template
+ * Task Manager
+ * Task Manager API
  *
  * The version of the OpenAPI document: 0.1.0
  * 

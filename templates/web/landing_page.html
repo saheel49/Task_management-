@@ -1,9 +1,148 @@
 {% extends "web/base.html" %}
 {% load static %}
+{% block page_title %}Task Manager - Organize Your Work{% endblock %}
+
 {% block body %}
+<section class="hero min-h-screen">
+  <div class="hero-content flex-col gap-10 px-4 py-16 mx-auto max-w-(--breakpoint-xl) lg:flex-row-reverse lg:py-24">
+    <div class="max-w-xl">
+      <h1 class="text-4xl font-bold tracking-tight md:text-5xl lg:text-6xl">
+        Organize Your Tasks, <span class="text-primary">Amplify Your Team</span>
+      </h1>
+      <p class="py-6 text-lg text-base-content/70">
+        Task Manager helps teams plan, track, and deliver work efficiently. 
+        Manage projects, assign tasks, and monitor progress—all in one place.
+      </p>
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg">Get Started Free</a>
+        <a href="{% url 'account_login' %}" class="btn btn-outline btn-lg">Sign In</a>
+      </div>
+      <div class="flex items-center gap-6 mt-8">
+        <div class="text-center">
+          <p class="text-2xl font-bold">{{ total_users }}+</p>
+          <p class="text-sm text-base-content/60">Active Users</p>
+        </div>
+        <div class="divider divider-horizontal"></div>
+        <div class="text-center">
+          <p class="text-2xl font-bold">{{ total_tasks }}+</p>
+          <p class="text-sm text-base-content/60">Tasks Completed</p>
+        </div>
+        <div class="divider divider-horizontal"></div>
+        <div class="text-center">
+          <p class="text-2xl font-bold">{{ total_projects }}+</p>
+          <p class="text-sm text-base-content/60">Projects</p>
+        </div>
+      </div>
+    </div>
+    <div class="flex-1 flex justify-center">
+      <div class="stats shadow-2xl">
+        <div class="stat">
+          <div class="stat-figure text-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+          </div>
+          <div class="stat-title">Total Tasks</div>
+          <div class="stat-value text-primary">{{ total_tasks }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-figure text-secondary">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+          </div>
+          <div class="stat-title">Users</div>
+          <div class="stat-value text-secondary">{{ total_users }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-figure text-accent">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+          </div>
+          <div class="stat-title">Projects</div>
+          <div class="stat-value text-accent">{{ total_projects }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
-{% include "web/components/hero.html" %}
-{% include "web/components/feature_highlight.html" %}
-{% include "web/components/cta.html" %}
+<!-- Features -->
+<section class="py-16 bg-base-200">
+  <div class="max-w-(--breakpoint-xl) mx-auto px-4">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold mb-4">Everything you need to manage tasks</h2>
+      <p class="text-base-content/70 max-w-2xl mx-auto">Powerful features to help your team stay organized, meet deadlines, and deliver projects on time.</p>
+    </div>
+    <div class="grid gap-6 md:grid-cols-3">
+      <div class="card bg-base-100 border border-base-300">
+        <div class="card-body">
+          <div class="flex items-center justify-center mb-2 rounded-box size-11 bg-primary/10 text-primary">
+            <svg class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>
+          </div>
+          <h3 class="card-title text-lg">Task Management</h3>
+          <p class="text-base-content/70">Create, assign, and track tasks with priorities, due dates, and statuses.</p>
+        </div>
+      </div>
+      <div class="card bg-base-100 border border-base-300">
+        <div class="card-body">
+          <div class="flex items-center justify-center mb-2 rounded-box size-11 bg-secondary/10 text-secondary">
+            <svg class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+          </div>
+          <h3 class="card-title text-lg">Project Organization</h3>
+          <p class="text-base-content/70">Group tasks into projects, set milestones, and track overall progress.</p>
+        </div>
+      </div>
+      <div class="card bg-base-100 border border-base-300">
+        <div class="card-body">
+          <div class="flex items-center justify-center mb-2 rounded-box size-11 bg-accent/10 text-accent">
+            <svg class="size-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
+          </div>
+          <h3 class="card-title text-lg">Analytics & Reports</h3>
+          <p class="text-base-content/70">Visualize team performance with charts, metrics, and completion rates.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
+<!-- Team / Users Section -->
+<section class="py-16">
+  <div class="max-w-(--breakpoint-xl) mx-auto px-4">
+    <div class="text-center mb-12">
+      <h2 class="text-3xl font-bold mb-4">Trusted by teams everywhere</h2>
+      <p class="text-base-content/70 max-w-2xl mx-auto">Join managers and employees who rely on Task Manager to get work done.</p>
+    </div>
+    <div class="grid gap-6 md:grid-cols-3">
+      {% for user in recent_users %}
+      <div class="card bg-base-100 border border-base-300 hover:shadow-lg transition-shadow">
+        <div class="card-body items-center text-center">
+          <div class="avatar mb-4">
+            <div class="w-16 h-16 rounded-full">
+              <img src="{{ user.avatar_url }}" alt="{{ user.get_display_name }}" />
+            </div>
+          </div>
+          <h3 class="card-title">{{ user.get_display_name }}</h3>
+          <p class="text-sm text-base-content/60">{{ user.email }}</p>
+          <div class="badge {% if user.user_type == 'manager' %}badge-primary{% else %}badge-secondary{% endif %}">{{ user.get_user_type_display }}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="text-center mt-8">
+      <a href="{% url 'account_signup' %}" class="btn btn-primary btn-lg">Join Your Team</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-16 bg-base-200">
+  <div class="max-w-(--breakpoint-xl) mx-auto px-4">
+    <div class="card bg-primary text-primary-content">
+      <div class="card-body items-center text-center">
+        <h2 class="text-2xl font-bold md:text-3xl">Ready to boost your productivity?</h2>
+        <p class="max-w-xl">Start managing tasks efficiently today. Sign up for free and experience seamless project management.</p>
+        <div class="flex flex-col gap-3 sm:flex-row">
+          <a href="{% url 'account_signup' %}" class="btn btn-lg">Get Started</a>
+          <a href="{% url 'account_login' %}" class="btn btn-outline btn-lg">Sign In</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock %}

@@ -1,32 +1,220 @@
 {% load i18n %}
 {% load form_tags %}
-<div class="flex flex-col space-y-4 lg:flex-row lg:space-x-4 lg:space-y-0">
-  <div id="profile-picture" class="basis-1/4 grow-0 shrink-0">
-    <div class="text-center">
-      <img class="avatar" src="{{ user.avatar_url }}">
-      <div id='profile-upload-holder'>
-        <label for="profile-upload" >
-          <a id="profile-upload-label" class="btn btn-ghost">
-            {% translate "Change Picture" %}
-          </a>
-        </label>
-        <input id="profile-upload" type="file" accept="image/*"/>
-      </div>
+
+<div class="flex flex-col space-y-6 lg:flex-row lg:space-x-8 lg:space-y-0">
+
+
+    <!-- Profile Picture -->
+
+    <div id="profile-picture" class="basis-1/4 shrink-0">
+
+        <div class="bg-base-100 rounded-xl shadow-lg p-6 text-center">
+
+
+            <label for="profile-upload" class="cursor-pointer">
+
+                <img
+                    id="avatar-preview"
+                    class="avatar rounded-full w-40 h-40 mx-auto border-4 border-primary object-cover transition hover:scale-105 hover:opacity-80"
+                    src="{{ user.avatar_url }}"
+                    alt="Profile Picture"
+                >
+
+            </label>
+
+
+            <h3 class="mt-4 text-xl font-bold">
+                {{ user.get_full_name|default:user.username }}
+            </h3>
+
+
+            <p class="text-base-content/70">
+                {{ user.email }}
+            </p>
+
+
+            <div class="mt-4">
+
+                <span class="badge badge-primary badge-lg">
+                    {{ user.get_user_type_display }}
+                </span>
+
+            </div>
+
+
+            <div class="mt-6">
+
+                <label for="profile-upload">
+
+                    <span class="btn btn-primary btn-sm">
+                        {% translate "Change Picture" %}
+                    </span>
+
+                </label>
+
+
+                <!-- Important: name must match your User model field -->
+                <input
+                    id="profile-upload"
+                    name="avatar"
+                    type="file"
+                    accept="image/*"
+                    class="hidden"
+                    form="profile-form"
+                >
+
+            </div>
+
+
+        </div>
+
+
     </div>
-  </div>
-  <div class="flex-1">
-    <h2 class="text-xl mb-1">{% translate "My Details" %}</h2>
-    <form method="post">
-      {% csrf_token %}
-      {% render_text_input form.email %}
-      {% if user.emailaddress_set.count > 1 %}
-        <div class="text-sm text-base-content/70"><a href="{% url "account_email" %}" class="link">{%  translate "Manage email addresses" %}</a></div>
-      {% endif %}
-      {% render_text_input form.first_name %}
-      {% render_text_input form.last_name %}
-      <div class="mt-2">
-        <input class="btn btn-primary" type="submit" value="{% translate "Save" %}">
-      </div>
-    </form>
-  </div>
+
+
+
+
+
+    <!-- Profile Form -->
+
+
+    <div class="flex-1">
+
+
+        <div class="bg-base-100 rounded-xl shadow-lg p-8">
+
+
+            <h2 class="text-3xl font-bold mb-2">
+                {% translate "My Profile" %}
+            </h2>
+
+
+            <p class="text-base-content/70 mb-6">
+                {% translate "Update your personal information." %}
+            </p>
+
+
+
+
+            <form method="post" enctype="multipart/form-data" id="profile-form">
+
+
+                {% csrf_token %}
+
+
+                {% render_field form.email %}
+
+                {% render_field form.first_name %}
+
+                {% render_field form.last_name %}
+
+                {% render_field form.phone %}
+
+                {% render_field form.bio %}
+
+                {% render_field form.user_type %}
+
+
+
+
+                <button
+                    type="submit"
+                    class="btn btn-primary w-full lg:w-auto mt-8"
+                >
+
+                    {% translate "Save Changes" %}
+
+                </button>
+
+
+
+            </form>
+
+
+        </div>
+
+
+    </div>
+
+
 </div>
+
+
+
+
+
+
+<!-- Preview Script Only -->
+
+<script>
+
+document.addEventListener("DOMContentLoaded", function () {
+
+
+    const uploadInput = document.getElementById("profile-upload");
+    const avatarPreview = document.getElementById("avatar-preview");
+
+
+    if (!uploadInput || !avatarPreview) {
+        return;
+    }
+
+
+
+    uploadInput.addEventListener("change", function () {
+
+        const file = this.files[0];
+
+
+        if (!file) {
+            return;
+        }
+
+
+        if (!file.type.startsWith("image/")) {
+
+
+            alert("Please select a valid image.");
+
+            this.value = "";
+
+            return;
+
+        }
+
+
+        if (file.size > 5 * 1024 * 1024) {
+
+            alert("Image must be smaller than 5 MB.");
+
+            this.value = "";
+
+            return;
+
+        }
+
+
+        const reader = new FileReader();
+
+
+
+        reader.onload = function(e){
+
+            avatarPreview.src = e.target.result;
+
+        };
+
+
+
+        reader.readAsDataURL(file);
+
+
+
+    });
+
+
+
+});
+
+
+</script>

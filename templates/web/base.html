@@ -2,7 +2,7 @@
 {% load django_vite %}
 {% load meta_tags %}
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <!--IE compatibility-->
@@ -38,15 +38,52 @@
 {% endif %}
 {% endblock meta %}
 {% include 'web/components/favicon.html' %}
+    <script>
+        (function() {
+            try {
+                var theme = localStorage.getItem('theme') || 'light';
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+        function toggleTheme() {
+            var html = document.documentElement;
+            var current = html.getAttribute('data-theme') || 'light';
+            var next = current === 'light' ? 'dark' : 'light';
+            localStorage.setItem('theme', next);
+            html.setAttribute('data-theme', next);
+            updateThemeIcon(next);
+        }
+        function updateThemeIcon(theme) {
+            var sun = document.getElementById('theme-sun');
+            var moon = document.getElementById('theme-moon');
+            if (!sun || !moon) return;
+            if (theme === 'dark') {
+                sun.classList.add('hidden');
+                moon.classList.remove('hidden');
+            } else {
+                sun.classList.remove('hidden');
+                moon.classList.add('hidden');
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            updateThemeIcon(document.documentElement.getAttribute('data-theme') || 'light');
+        });
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% vite_asset_url 'assets/styles/site-base.css' %}">
     <link rel="stylesheet" href="{% vite_asset_url 'assets/styles/site-tailwind.css' %}">
-
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
     {% if GOOGLE_ANALYTICS_ID %}
         {% include 'web/components/google_analytics.html' %}
     {% endif %}
+    <script src="https://unpkg.com/htmx.org@2/dist/htmx.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     {% vite_asset 'assets/javascript/site.js' %}
     {% vite_hmr_client %}
     <script>__cssFramework = 'tailwind';</script>
@@ -70,5 +107,12 @@
   {% include 'web/components/messages-js.html' %}
 {% block page_js %}
 {% endblock page_js %}
+<script>
+    if ("serviceWorker" in navigator) {
+        window.addEventListener("load", function () {
+            navigator.serviceWorker.register("{% static 'sw.js' %}");
+        });
+    }
+</script>
 </body>
 </html>

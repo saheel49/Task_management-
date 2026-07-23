@@ -1,8 +1,29 @@
-{% extends 'web/components/top_nav.html' %}
+{% extends "web/components/top_nav.html" %}
 {% block mobile_nav %}
-<li class="menu-title">
-  <span>Site</span>
-</li>
 {{ block.super }}
-{% include 'web/components/app_nav_menu_items.html' %}
+{% if user.is_authenticated %}
+<li class="menu-title">
+  <span>My Account</span>
+</li>
+<li>
+  <a href="{% url 'users:user_profile' %}" {% if request.path == '/users/profile/' %}class="active"{% endif %}>
+    <i class="fa fa-user h-4 w-4"></i>
+    Profile
+  </a>
+</li>
+{% if user.has_usable_password %}
+<li>
+  <a href="{% url 'account_change_password' %}" {% if 'accounts/password/change' in request.path %}class="active"{% endif %}>
+    <i class="fa fa-unlock-alt h-4 w-4"></i>
+    Change Password
+  </a>
+</li>
+{% endif %}
+<li>
+  <a href="{% url 'account_logout' %}" data-logout-link {% if 'accounts/logout' in request.path %}class="active"{% endif %}>
+    <i class="fa fa-sign-out h-4 w-4"></i>
+    Sign out
+  </a>
+</li>
+{% endif %}
 {% endblock %}

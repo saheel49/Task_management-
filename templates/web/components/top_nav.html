@@ -8,16 +8,58 @@
           <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="24" height="24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
         </button>
       </div>
+      <a href="{% url 'dashboard:dashboard' %}" class="btn btn-ghost normal-case text-xl hidden lg:flex">
+        {{ project_meta.NAME }}
+      </a>
     </div>
     <div class="navbar-center hidden lg:flex">
       <div role="tablist" class="tabs p-0">
-        <a class="tab {% if request.path == '/' %}tab-active{% endif %}" href="{% url 'web:home' %}">
-          <div>{{project_meta.NAME}}</div>
+        <a class="tab tab-bordered {% if request.path == '/' %}tab-active{% endif %}" href="{% url 'web:home' %}">
+          <div>{% translate "Home" %}</div>
         </a>
+        {% if user.is_authenticated %}
+        <a class="tab tab-bordered {% if request.path == '/dashboard/' or request.path == '/dashboard' %}tab-active{% endif %}" href="{% url 'dashboard:dashboard' %}">
+          <div>{% translate "Dashboard" %}</div>
+        </a>
+        {% endif %}
       </div>
     </div>
     <div class="navbar-end">
+      <button onclick="toggleTheme()" class="btn btn-ghost btn-circle">
+        <svg id="theme-sun" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+        <svg id="theme-moon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
+      </button>
       {% if user.is_authenticated %}
+      <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+          <div class="w-8 h-8 rounded-full overflow-hidden">
+            <img src="{{ user.avatar_url }}" alt="{% translate "Avatar" %}" />
+          </div>
+        </div>
+        <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+          <li class="menu-title">
+            <span>{{ user.get_display_name }}</span>
+          </li>
+          <li>
+            <a href="{% url 'dashboard:dashboard' %}">
+              <i class="fa fa-home h-4 w-4"></i>
+              {% translate "Dashboard" %}
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'users:user_profile' %}">
+              <i class="fa fa-user h-4 w-4"></i>
+              {% translate "Profile" %}
+            </a>
+          </li>
+          <li>
+            <a href="{% url 'account_logout' %}" data-logout-link>
+              <i class="fa fa-sign-out h-4 w-4"></i>
+              {% translate "Sign out" %}
+            </a>
+          </li>
+        </ul>
+      </div>
       {% else %}
       <a href="{% url 'account_signup' %}" class="btn btn-primary">
         {% translate "Sign Up" %}
@@ -58,11 +100,35 @@
         </div>
         <ul class="menu p-4">
           {% block mobile_nav %}
+          <li class="menu-title">
+            <span>{% translate "Main" %}</span>
+          </li>
           <li>
-            <a class="{% if request.path == '/' %}active{% endif %}" href="{% url 'web:home' %}">
-              <div>{{project_meta.NAME}}</div>
+            <a class="{% if request.path == '/' %}menu-active{% endif %}" href="{% url 'web:home' %}">
+              <i class="fa fa-home h-4 w-4"></i>
+              {% translate "Home" %}
             </a>
           </li>
+          {% if user.is_authenticated %}
+          <li>
+            <a class="{% if request.path == '/dashboard/' %}menu-active{% endif %}" href="{% url 'dashboard:dashboard' %}">
+              <i class="fa fa-dashboard h-4 w-4"></i>
+              {% translate "Dashboard" %}
+            </a>
+          </li>
+          <li>
+            <a class="{% if request.path|slice:'7' == '/tasks/' and request.path|slice:'18' != '/tasks/projects/' %}menu-active{% endif %}" href="{% url 'tasks:task_list' %}">
+              <i class="fa fa-list-check h-4 w-4"></i>
+              {% translate "Tasks" %}
+            </a>
+          </li>
+          <li>
+            <a class="{% if request.path|slice:'18' == '/tasks/projects/' %}menu-active{% endif %}" href="{% url 'tasks:project_list' %}">
+              <i class="fa fa-folder h-4 w-4"></i>
+              {% translate "Projects" %}
+            </a>
+          </li>
+          {% endif %}
           {% endblock %}
         </ul>
       </div>

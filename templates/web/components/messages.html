@@ -1,8 +1,31 @@
 {% if messages %}
-  {% for message in messages %}
-    <div class="notification flex w-full justify-between alert {% if message.tags %}alert-{{ message.level_tag }}{% endif %} shadow-md rounded-none! {{ message.extra_tags }} mb-1" >
-      <div>{{ message }}</div>
-      <button class="delete"><i class="fa fa-times"></i></button>
-    </div>
-  {% endfor %}
+  <div class="fixed top-4 right-4 z-50 flex flex-col gap-2 max-w-sm">
+    {% for message in messages %}
+      {% with message_tags=message.tags|default:"info" %}
+      <div class="notification alert alert-{{ message_tags }} shadow-lg rounded-lg mb-1" 
+           x-data="{ show: true }" 
+           x-show="show" 
+           x-init="setTimeout(() => show = false, 4000)"
+           x-transition:enter="transition ease-out duration-300"
+           x-transition:enter-start="opacity-0 transform translate-x-4"
+           x-transition:enter-end="opacity-100 transform translate-x-0"
+           x-transition:leave="transition ease-in duration-300"
+           x-transition:leave-start="opacity-100 transform translate-x-0"
+           x-transition:leave-end="opacity-0 transform translate-x-4">
+        <div class="flex items-center gap-2">
+          {% if 'error' in message_tags %}
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          {% elif 'warning' in message_tags %}
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.932-3L13.332 4c-.54-1.332-2.001-1.332-2.541 0L3.082 16c-.54 1.332.46 3 2 3z" /></svg>
+          {% elif 'success' in message_tags %}
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          {% else %}
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          {% endif %}
+          <span class="flex-1 text-sm font-medium">{{ message }}</span>
+        </div>
+      </div>
+      {% endwith %}
+    {% endfor %}
+  </div>
 {% endif %}

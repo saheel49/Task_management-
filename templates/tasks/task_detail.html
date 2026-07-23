@@ -1,0 +1,63 @@
+{% extends "web/base.html" %}
+
+{% load static %}
+
+{% block page_title %}
+Task Details
+{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-6 py-10">
+
+    {% include 'web/components/breadcrumbs.html' with breadcrumbs=breadcrumbs %}
+
+    <div class="bg-base-100 shadow rounded-xl p-6">
+        <h1 class="text-3xl font-bold mb-4">{{ task.title }}</h1>
+
+        <p class="text-base-content/70 mb-4">{{ task.description }}</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+                <p class="text-base-content/60">Project</p>
+                <p class="font-semibold">{{ task.project.name }}</p>
+            </div>
+            <div>
+                <p class="text-base-content/60">Assigned To</p>
+                <p class="font-semibold">{{ task.assigned_to.get_display_name }}</p>
+            </div>
+        </div>
+
+        <div class="flex flex-wrap gap-3 mt-4">
+            {% if task.status == "completed" %}
+                <span class="badge badge-success">{{ task.status }}</span>
+            {% elif task.status == "progress" %}
+                <span class="badge badge-warning">{{ task.status }}</span>
+            {% else %}
+                <span class="badge badge-error">{{ task.status }}</span>
+            {% endif %}
+
+            {% if task.priority == "high" %}
+                <span class="badge badge-error">{{ task.priority }}</span>
+            {% elif task.priority == "medium" %}
+                <span class="badge badge-warning">{{ task.priority }}</span>
+            {% else %}
+                <span class="badge badge-info">{{ task.priority }}</span>
+            {% endif %}
+        </div>
+
+        {% if user.is_superuser or user.user_type == "manager" %}
+        <div class="flex flex-wrap gap-3 mt-4">
+            <a href="{% url 'tasks:update_task' task.id %}" class="btn btn-warning btn-sm">Edit</a>
+            <a href="{% url 'tasks:delete_task' task.id %}" class="btn btn-error btn-sm">Delete</a>
+        </div>
+        {% endif %}
+
+        {% if task.due_date %}
+        <p class="text-sm font-medium {% if task.due_date < today and task.status != "completed" %}text-red-600{% else %}text-blue-600{% endif %} mt-4">
+            Due: {{ task.due_date|date:"M d, Y" }}
+        </p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

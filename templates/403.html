@@ -1,8 +1,13 @@
 {% extends 'error_base.html' %}
 {% load i18n %}
 {% block error_details %}
-  <h1 class="text-3xl font-bold mb-2">{% translate "Oops. You don't have permission to do that." %}</h1>
-  <h2 class="text-xl mb-1">
-    {% translate "If you think this is a mistake, contact support." %}
-  </h2>
+  <div class="text-center">
+    <h1 class="text-6xl font-bold text-warning mb-4">{% translate "403" %}</h1>
+    <h2 class="text-2xl font-semibold mb-4">{% translate "Access Denied" %}</h2>
+    <p class="text-base-content/60 mb-6">{% translate "You do not have permission to view this page. If you believe this is an error, please contact your administrator." %}</p>
+    <div class="flex flex-wrap gap-3 justify-center">
+      <a href="{% url 'dashboard:dashboard' %}" class="btn btn-primary">{% translate "Go to Dashboard" %}</a>
+      <a href="{% url 'web:home' %}" class="btn btn-outline">{% translate "Go Home" %}</a>
+    </div>
+  </div>
 {% endblock %}

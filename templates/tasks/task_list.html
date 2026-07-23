@@ -1,0 +1,189 @@
+{% extends "web/base.html" %}
+
+{% load static %}
+
+{% block page_title %}
+Tasks
+{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-6 py-10">
+
+    {% include 'web/components/breadcrumbs.html' with breadcrumbs=breadcrumbs %}
+
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-4xl font-bold">My Tasks</h1>
+        {% if user.is_superuser or user.user_type == "manager" %}
+        <a href="{% url 'tasks:create_task' %}" class="btn btn-primary">+ Create Task</a>
+        {% endif %}
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="bg-base-100 rounded-xl shadow p-6 mb-8">
+        <form method="get" class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                    <label class="label"><span class="label-text font-semibold">Search</span></label>
+                    <input type="text" name="search" value="{{ search_query }}" placeholder="Search tasks..." class="input input-bordered w-full">
+                </div>
+                <div>
+                    <label class="label"><span class="label-text font-semibold">Status</span></label>
+                    <select name="status" class="select select-bordered w-full">
+                        <option value="">All Statuses</option>
+                        <option value="todo" {% if status_filter == "todo" %}selected{% endif %}>To Do</option>
+                        <option value="progress" {% if status_filter == "progress" %}selected{% endif %}>In Progress</option>
+                        <option value="completed" {% if status_filter == "completed" %}selected{% endif %}>Completed</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="label"><span class="label-text font-semibold">Priority</span></label>
+                    <select name="priority" class="select select-bordered w-full">
+                        <option value="">All Priorities</option>
+                        <option value="low" {% if priority_filter == "low" %}selected{% endif %}>Low</option>
+                        <option value="medium" {% if priority_filter == "medium" %}selected{% endif %}>Medium</option>
+                        <option value="high" {% if priority_filter == "high" %}selected{% endif %}>High</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="label"><span class="label-text font-semibold">Project</span></label>
+                    <select name="project" class="select select-bordered w-full">
+                        <option value="">All Projects</option>
+                        {% for project in projects %}
+                            <option value="{{ project.id }}" {% if project_filter == project.id|stringformat:"s" %}selected{% endif %}>{{ project.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div>
+                    <label class="label"><span class="label-text font-semibold">Sort By</span></label>
+                    <select name="sort" class="select select-bordered w-full">
+                        <option value="-created_at" {% if sort_by == "-created_at" %}selected{% endif %}>Newest First</option>
+                        <option value="created_at" {% if sort_by == "created_at" %}selected{% endif %}>Oldest First</option>
+                        <option value="due_date" {% if sort_by == "due_date" %}selected{% endif %}>Due Date (Asc)</option>
+                        <option value="-due_date" {% if sort_by == "-due_date" %}selected{% endif %}>Due Date (Desc)</option>
+                        <option value="priority" {% if sort_by == "priority" %}selected{% endif %}>Priority (Low to High)</option>
+                        <option value="-priority" {% if sort_by == "-priority" %}selected{% endif %}>Priority (High to Low)</option>
+                        <option value="status" {% if sort_by == "status" %}selected{% endif %}>Status (A-Z)</option>
+                        <option value="-status" {% if sort_by == "-status" %}selected{% endif %}>Status (Z-A)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="flex gap-3">
+                <button type="submit" class="btn btn-primary">Apply Filters</button>
+                <a href="{% url 'tasks:task_list' %}" class="btn btn-ghost">Clear</a>
+            </div>
+        </form>
+    </div>
+
+    <!-- Statistics -->
+    <div class="stats shadow w-full mb-8">
+        <div class="stat">
+            <div class="stat-title">Total Tasks</div>
+            <div class="stat-value">{{ total_tasks }}</div>
+        </div>
+        <div class="stat">
+            <div class="stat-title">Completed</div>
+            <div class="stat-value text-success">{{ completed_tasks }}</div>
+        </div>
+        <div class="stat">
+            <div class="stat-title">In Progress</div>
+            <div class="stat-value text-warning">{{ in_progress_tasks }}</div>
+        </div>
+        <div class="stat">
+            <div class="stat-title">Pending</div>
+            <div class="stat-value text-error">{{ pending_tasks }}</div>
+        </div>
+    </div>
+
+    <!-- Task Cards -->
+    <div class="grid gap-6">
+        {% for task in page_obj %}
+        {% if task.due_date and task.due_date < today and task.status != "completed" %}
+        <div class="bg-error/10 border-l-4 border-error rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer" onclick="window.location='{% url 'tasks:task_detail' task.id %}'">
+        {% else %}
+        <div class="bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer" onclick="window.location='{% url 'tasks:task_detail' task.id %}'">
+        {% endif %}
+
+            <!-- Task Title -->
+            <h2 class="text-2xl font-bold text-primary hover:underline">{{ task.title }}</h2>
+
+            <!-- Project -->
+            <p class="text-sm text-base-content/60 mt-1">Project: <a href="{% url 'tasks:project_detail' task.project.id %}" class="text-primary hover:underline">{{ task.project.name }}</a></p>
+
+            <!-- Description -->
+            <p class="text-base-content/70 mt-3">{{ task.description }}</p>
+
+            <!-- Created Date -->
+            <p class="text-sm text-base-content/50 mt-2">
+                Created: {{ task.created_at|date:"M d, Y H:i" }}
+            </p>
+
+            {% if task.due_date %}
+            <p class="text-sm font-medium {% if task.due_date < today and task.status != "completed" %}text-red-600{% else %}text-blue-600{% endif %} mt-1">
+                Due: {{ task.due_date|date:"M d, Y" }}
+            </p>
+            {% endif %}
+
+            <!-- Badges -->
+            <div class="mt-5 flex flex-wrap gap-3">
+                {% if task.status == "completed" %}
+                    <span class="badge badge-success">{{ task.status }}</span>
+                {% elif task.status == "progress" %}
+                    <span class="badge badge-warning">{{ task.status }}</span>
+                {% else %}
+                    <span class="badge badge-error">{{ task.status }}</span>
+                {% endif %}
+
+                {% if task.priority == "high" %}
+                    <span class="badge badge-error">{{ task.priority }}</span>
+                {% elif task.priority == "medium" %}
+                    <span class="badge badge-warning">{{ task.priority }}</span>
+                {% else %}
+                    <span class="badge badge-info">{{ task.priority }}</span>
+                {% endif %}
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mt-6 flex flex-wrap gap-3" onclick="event.stopPropagation()">
+                <a href="{% url 'tasks:task_detail' task.id %}" class="btn btn-info btn-sm">View</a>
+                {% if user.is_superuser or user.user_type == "manager" %}
+                <a href="{% url 'tasks:update_task' task.id %}" class="btn btn-warning btn-sm">Edit</a>
+                <a href="{% url 'tasks:delete_task' task.id %}" class="btn btn-error btn-sm">Delete</a>
+                {% endif %}
+            </div>
+
+        </div>
+
+        {% empty %}
+        <div class="bg-base-100 rounded-xl shadow p-8 text-center">
+            <h2 class="text-2xl font-bold mb-3">No Tasks Yet</h2>
+            <p class="text-base-content/60 mb-6">You don't have any tasks assigned yet.</p>
+            <a href="{% url 'tasks:create_task' %}" class="btn btn-primary">Create Your First Task</a>
+        </div>
+        {% endfor %}
+
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="flex justify-center mt-8">
+        <div class="join">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if project_filter %}&project={{ project_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" class="btn btn-sm btn-primary">«</a>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <button class="btn btn-sm btn-active">{{ num }}</button>
+                {% else %}
+                    <a href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if project_filter %}&project={{ project_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" class="btn btn-sm">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if project_filter %}&project={{ project_filter }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}" class="btn btn-sm btn-primary">»</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

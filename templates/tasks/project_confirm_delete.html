@@ -1,0 +1,30 @@
+{% extends "web/base.html" %}
+
+{% load static %}
+
+{% block page_title %}
+Delete Project
+{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-6 py-10">
+    <div class="max-w-2xl mx-auto">
+
+        {% include 'web/components/breadcrumbs.html' with breadcrumbs=breadcrumbs %}
+
+        <h1 class="text-3xl font-bold mb-6">Delete Project</h1>
+
+        <div class="bg-base-100 shadow rounded-xl p-6">
+            <p class="text-lg mb-6">Are you sure you want to delete the project <strong>"{{ project.name }}"</strong>? This action cannot be undone.</p>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="flex gap-3">
+                    <button type="submit" class="btn btn-error">Delete</button>
+                    <a href="{% url 'tasks:project_detail' project.id %}" class="btn btn-ghost">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

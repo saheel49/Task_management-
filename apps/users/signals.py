@@ -10,19 +10,11 @@ from apps.users.models import CustomUser
 
 @receiver(user_signed_up)
 def handle_sign_up(request, user, **kwargs):
-    # customize this function to do custom logic on sign up, e.g. send a welcome email
-    # or subscribe them to your mailing list.
-    # This example notifies the admins, in case you want to keep track of sign ups
     _notify_admins_of_signup(user)
 
 
 @receiver(email_confirmed)
 def update_user_email(sender, request, email_address, **kwargs):
-    """
-    When an email address is confirmed make it the primary email.
-    """
-    # This also sets user.email to the new email address.
-    # hat tip: https://stackoverflow.com/a/29661871/8207
     email_address.set_as_primary()
 
 

@@ -13,12 +13,20 @@ class ProfileEmailChangeTest(TestCase):
 
     def setUp(self):
         super().setUp()
-        self.user = CustomUser.objects.create(username="old@example.com", email="old@example.com")
-        self.user.set_password("password")
-        self.user.save()
-        # current primary email, plus a second already-verified email the user owns
-        EmailAddress.objects.create(user=self.user, email="old@example.com", verified=True, primary=True)
-        EmailAddress.objects.create(user=self.user, email="new@example.com", verified=True, primary=False)
+        self.user = CustomUser.objects.create_user(
+            email="old@example.com",
+            password="password",
+        )
+        EmailAddress.objects.update_or_create(
+            user=self.user,
+            email="old@example.com",
+            defaults={"verified": True, "primary": True},
+        )
+        EmailAddress.objects.update_or_create(
+            user=self.user,
+            email="new@example.com",
+            defaults={"verified": True, "primary": False},
+        )
 
         self.client = Client()
         self.client.force_login(self.user)

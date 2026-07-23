@@ -23,8 +23,14 @@ class TestLoginRequiredViewBase(TestViewBase):
         super().setUpClass()
         cls.client = Client()
         cls.authenticated_client = Client()
-        cls.user = CustomUser.objects.create_user(username="testing@example.com", password="12345")
-        cls.authenticated_client.login(username="testing@example.com", password="12345")
+        cls.user = CustomUser.objects.create_user(
+            email="testing@example.com",
+            password="12345",
+        )
+        cls.authenticated_client.login(
+            email="testing@example.com",
+            password="12345",
+        )
 
     def _run_tests(self, url: str):
         self._assert_login_requred(url)

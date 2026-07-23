@@ -1,0 +1,101 @@
+{% extends "web/base.html" %}
+
+{% load static %}
+
+{% block page_title %}
+Create Task
+{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-6 py-10">
+    <div class="max-w-2xl mx-auto">
+
+        {% include 'web/components/breadcrumbs.html' with breadcrumbs=breadcrumbs %}
+
+        <h1 class="text-3xl font-bold mb-6">Create Task</h1>
+
+        {% if form.errors %}
+        <div class="notification alert alert-error mb-6">
+            Please correct the errors below.
+        </div>
+        {% endif %}
+
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Title</span>
+                </label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                <div class="text-error text-sm mt-1">{{ form.title.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Description</span>
+                </label>
+                {{ form.description }}
+                {% if form.description.errors %}
+                <div class="text-error text-sm mt-1">{{ form.description.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            {% if user.is_superuser or user.user_type == "manager" %}
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Assign To</span>
+                </label>
+                {{ form.assigned_to }}
+                {% if form.assigned_to.errors %}
+                <div class="text-error text-sm mt-1">{{ form.assigned_to.errors.0 }}</div>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Project</span>
+                </label>
+                {{ form.project }}
+                {% if form.project.errors %}
+                <div class="text-error text-sm mt-1">{{ form.project.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Priority</span>
+                    </label>
+                    {{ form.priority }}
+                </div>
+
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text font-semibold">Status</span>
+                    </label>
+                    {{ form.status }}
+                </div>
+            </div>
+
+            <div class="form-control">
+                <label class="label">
+                    <span class="label-text font-semibold">Due Date</span>
+                </label>
+                {{ form.due_date }}
+                {% if form.due_date.errors %}
+                <div class="text-error text-sm mt-1">{{ form.due_date.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="flex gap-3">
+                <button type="submit" class="btn btn-primary">Create Task</button>
+                <a href="{% url 'dashboard:dashboard' %}" class="btn btn-outline btn-sm">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

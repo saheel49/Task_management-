@@ -97,7 +97,7 @@ npm-dev: ## Runs the Vite dev server
 npm-type-check: ## Runs the type checker on the front end TypeScript code
 	@npm run type-check
 
-upgrade: requirements migrations migrate npm-install npm-dev  ## Run after a Pegasus upgrade to update requirements, migrate the database, and rebuild the front end
+upgrade: requirements migrations migrate npm-install npm-dev  ## Run after a framework upgrade to update requirements, migrate the database, and rebuild the front end
 
 # -----------------------------------------------------------------------------
 # API client code generation

@@ -6,17 +6,20 @@ from django.utils.translation import gettext_lazy as _
 
 class EmailAsUsernameAdapter(DefaultAccountAdapter):
     """
-    Adapter that always sets the username equal to the user's email address.
+    Adapter that keeps the username field in sync with the email address
+    and prevents allauth from overwriting the email with a generated
+    username when USERNAME_FIELD is set to email.
     """
 
     def __init__(self, request=None):
         super().__init__(request)
-        # Prevent leaking whether someone is already signed up.
         self.error_messages["email_taken"] = _("There was an issue creating the account. Please contact support.")
 
     def populate_username(self, request, user):
-        # override the username population to always use the email
-        user_field(user, app_settings.USER_MODEL_USERNAME_FIELD, user_email(user))
+        if app_settings.USER_MODEL_USERNAME_FIELD == "email":
+            user.username = user_email(user)
+        else:
+            user_field(user, app_settings.USER_MODEL_USERNAME_FIELD, user_email(user))
 
 
 class NoNewUsersAccountAdapter(DefaultAccountAdapter):

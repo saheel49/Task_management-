@@ -1,17 +1,7 @@
-"""django-template URL Configuration
+"""
+Task Manager URL Configuration
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/stable/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+The `urlpatterns` list routes URLs to views.
 """
 
 from django.conf import settings
@@ -19,8 +9,11 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
-from django.views.generic import RedirectView
-from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
+from drf_spectacular.views import (
+    SpectacularAPIView,
+    SpectacularRedocView,
+    SpectacularSwaggerView,
+)
 
 from apps.web.sitemaps import StaticViewSitemap
 
@@ -28,28 +21,53 @@ sitemaps = {
     "static": StaticViewSitemap(),
 }
 
+handler404 = "apps.web.views.page_not_found"
+handler403 = "django.views.defaults.permission_denied"
+handler500 = "apps.web.views.server_error"
+
 urlpatterns = [
-    # redirect Django admin login to main login page
-    path("admin/login/", RedirectView.as_view(pattern_name="account_login")),
     path("admin/", admin.site.urls),
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
+    # Authentication
     path("accounts/", include("allauth.urls")),
+    # Users
     path("users/", include("apps.users.urls")),
+    # Dashboard
+    path("dashboard/", include("apps.dashboard.urls")),
+    # Website
     path("", include("apps.web.urls")),
+    # Celery Progress
     path("celery-progress/", include("celery_progress.urls")),
-    # API docs.
-    # These endpoints are public by default. To restrict access, pass `permission_classes`
-    # to the views below (e.g. `[permissions.IsAdminUser]`), gate on `settings.DEBUG`,
-    # or remove them entirely if you don't want to expose your API surface.
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    # Optional UI - you may wish to remove one of these depending on your preference
-    path("api/schema/swagger-ui/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
-    path("api/schema/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
-] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    # API Schema
+    path(
+        "api/schema/",
+        SpectacularAPIView.as_view(),
+        name="schema",
+    ),
+    path(
+        "api/schema/swagger-ui/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
+    path(
+        "api/schema/redoc/",
+        SpectacularRedocView.as_view(url_name="schema"),
+        name="redoc",
+    ),
+    # Tasks
+    path("tasks/", include("tasks.urls")),
+]
 
-# Add browser reload URL if the middleware is enabled (matches middleware check in settings.py)
+# Serve uploaded media files
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Browser reload
 if "django_browser_reload.middleware.BrowserReloadMiddleware" in settings.MIDDLEWARE:
-    urlpatterns.insert(0, path("__reload__/", include("django_browser_reload.urls")))
+    urlpatterns.insert(
+        0,
+        path("__reload__/", include("django_browser_reload.urls")),
+    )
 
+# Debug toolbar
 if settings.ENABLE_DEBUG_TOOLBAR:
     urlpatterns.append(path("__debug__/", include("debug_toolbar.urls")))

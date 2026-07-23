@@ -1,0 +1,390 @@
+{% extends "web/base.html" %}
+
+{% load static %}
+
+{% block page_title %}
+Dashboard
+{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-6 py-10">
+
+    {% include 'web/components/breadcrumbs.html' with breadcrumbs=breadcrumbs %}
+
+    <!-- Welcome Section -->
+    <div class="mb-10">
+        <h1 class="text-4xl font-bold">
+            {% if is_manager %}
+                Manager Dashboard
+            {% else %}
+                My Task Dashboard
+            {% endif %}
+        </h1>
+        <p class="text-base-content/60 mt-2">
+            {% if is_manager %}
+                System overview, management tools, and all project analytics
+            {% else %}
+                Track your tasks, monitor progress, and stay on top of your work
+            {% endif %}
+        </p>
+    </div>
+
+    {% if is_manager %}
+    <!-- ==================== MANAGER DASHBOARD ==================== -->
+    
+    <!-- System Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <a href="{% url 'tasks:task_list' %}" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">Total Tasks</h3>
+            <p class="text-3xl font-bold mt-3">{{ total_tasks }}</p>
+        </a>
+        <a href="{% url 'tasks:task_list' %}?status=completed" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">Completed</h3>
+            <p class="text-3xl font-bold mt-3 text-success">{{ completed_tasks }}</p>
+        </a>
+        <a href="{% url 'tasks:task_list' %}?status=progress" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">In Progress</h3>
+            <p class="text-3xl font-bold mt-3 text-warning">{{ in_progress_tasks }}</p>
+        </a>
+        <a href="{% url 'tasks:task_list' %}?status=todo" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">To Do</h3>
+            <p class="text-3xl font-bold mt-3 text-error">{{ todo_tasks }}</p>
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <a href="{% url 'tasks:project_list' %}" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">Total Projects</h3>
+            <p class="text-3xl font-bold mt-3">{{ total_projects }}</p>
+        </a>
+        <a href="{% url 'tasks:project_list' %}" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">Active Projects</h3>
+            <p class="text-3xl font-bold mt-3 text-primary">{{ active_projects }}</p>
+        </a>
+        <a href="{% url 'tasks:task_list' %}?priority=high" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">High Priority</h3>
+            <p class="text-3xl font-bold mt-3 text-error">{{ high_priority_tasks }}</p>
+        </a>
+        <a href="{% url 'users:user_list' %}" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">All Users</h3>
+            <p class="text-3xl font-bold mt-3 text-accent">{{ total_users }}</p>
+        </a>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <a href="{% url 'tasks:task_list' %}?sort=due_date" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">Overdue Tasks</h3>
+            <p class="text-3xl font-bold mt-3 text-error">{{ overdue_tasks }}</p>
+            <p class="text-sm text-base-content/60 mt-1">Due before today</p>
+        </a>
+        <a href="{% url 'tasks:task_list' %}" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">Due Today</h3>
+            <p class="text-3xl font-bold mt-3 text-warning">{{ due_today_tasks }}</p>
+            <p class="text-sm text-base-content/60 mt-1">{{ today|date:"M d, Y" }}</p>
+        </a>
+        <a href="{% url 'tasks:task_list' %}?sort=due_date" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">Due This Week</h3>
+            <p class="text-3xl font-bold mt-3 text-primary">{{ due_this_week_tasks }}</p>
+            <p class="text-sm text-base-content/60 mt-1">This week</p>
+        </a>
+    </div>
+
+    <!-- Completion -->
+    <div class="bg-base-100 rounded-xl shadow p-6 mb-8">
+        <h2 class="text-2xl font-bold mb-4">Overall Completion Rate</h2>
+        <div class="flex items-center gap-4">
+            <div class="flex-1">
+                <div class="w-full bg-base-300 rounded-full h-4">
+                    <div class="bg-success h-4 rounded-full" style="width: {{ completion_percentage }}%"></div>
+                </div>
+            </div>
+            <span class="text-2xl font-bold">{{ completion_percentage }}%</span>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-base-100 rounded-xl shadow p-6">
+            <h2 class="text-2xl font-bold mb-4">Tasks by Status</h2>
+            <div class="h-64">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+        <div class="bg-base-100 rounded-xl shadow p-6">
+            <h2 class="text-2xl font-bold mb-4">Tasks by Priority</h2>
+            <div class="h-64">
+                <canvas id="priorityChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="bg-base-100 rounded-xl shadow p-6 mb-8">
+        <h2 class="text-2xl font-bold mb-4">Tasks Created Over Time (Last 14 Days)</h2>
+        <div class="h-80">
+            <canvas id="tasksOverTimeChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-base-100 rounded-xl shadow p-6">
+            <h2 class="text-2xl font-bold mb-5">Recent Tasks</h2>
+            {% for task in recent_tasks %}
+            <a href="{% url 'tasks:task_detail' task.id %}" class="block border-b last:border-b-0 py-4 hover:bg-base-200 transition-colors rounded">
+                <h3 class="font-semibold">{{ task.title }}</h3>
+                <p class="text-sm text-base-content/60">Project: {{ task.project.name }}</p>
+                <div class="mt-2 flex gap-2">
+                    <span class="badge {% if task.status == "completed" %}badge-success{% elif task.status == "progress" %}badge-warning{% else %}badge-error{% endif %}">{{ task.status }}</span>
+                    <span class="badge {% if task.priority == "high" %}badge-error{% elif task.priority == "medium" %}badge-warning{% else %}badge-info{% endif %}">{{ task.priority }}</span>
+                </div>
+            </a>
+            {% empty %}
+            <p class="text-base-content/60">No tasks found.</p>
+            {% endfor %}
+        </div>
+        <div class="bg-base-100 rounded-xl shadow p-6">
+            <h2 class="text-2xl font-bold mb-5">Recent Projects</h2>
+            {% for project in recent_projects %}
+            <a href="{% url 'tasks:project_detail' project.id %}" class="block border-b last:border-b-0 py-4 hover:bg-base-200 transition-colors rounded">
+                <h3 class="font-semibold">{{ project.name }}</h3>
+                <p class="text-sm text-base-content/60">{{ project.description|truncatewords:15 }}</p>
+                <span class="badge badge-secondary mt-2">{{ project.status }}</span>
+            </a>
+            {% empty %}
+            <p class="text-base-content/60">No projects found.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Management Tools -->
+    <div class="bg-base-100 rounded-xl shadow p-6 mb-8">
+        <h2 class="text-2xl font-bold mb-5">Management Tools</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <a href="{% url 'admin:index' %}" class="block bg-base-200 rounded-xl p-6 hover:shadow-md transition-shadow cursor-pointer">
+                <h3 class="text-lg font-semibold">Admin Panel</h3>
+                <p class="text-sm text-base-content/60 mt-2">Manage users, tasks, and projects</p>
+            </a>
+            <a href="{% url 'tasks:project_list' %}" class="block bg-base-200 rounded-xl p-6 hover:shadow-md transition-shadow cursor-pointer">
+                <h3 class="text-lg font-semibold">All Projects</h3>
+                <p class="text-sm text-base-content/60 mt-2">View and manage all projects</p>
+            </a>
+            <a href="{% url 'tasks:task_list' %}" class="block bg-base-200 rounded-xl p-6 hover:shadow-md transition-shadow cursor-pointer">
+                <h3 class="text-lg font-semibold">All Tasks</h3>
+                <p class="text-sm text-base-content/60 mt-2">View and assign all tasks</p>
+            </a>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- ==================== EMPLOYEE DASHBOARD ==================== -->
+
+    <!-- Employee Progress Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <a href="{% url 'tasks:task_list' %}" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">My Tasks</h3>
+            <p class="text-3xl font-bold mt-3">{{ total_tasks }}</p>
+        </a>
+        <a href="{% url 'tasks:task_list' %}?status=completed" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">Completed</h3>
+            <p class="text-3xl font-bold mt-3 text-success">{{ completed_tasks }}</p>
+        </a>
+        <a href="{% url 'tasks:task_list' %}?status=progress" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">In Progress</h3>
+            <p class="text-3xl font-bold mt-3 text-warning">{{ in_progress_tasks }}</p>
+        </a>
+        <a href="{% url 'tasks:task_list' %}?status=todo" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">To Do</h3>
+            <p class="text-3xl font-bold mt-3 text-error">{{ todo_tasks }}</p>
+        </a>
+    </div>
+
+    <!-- Employee Progress Bar -->
+    <div class="bg-base-100 rounded-xl shadow p-6 mb-8">
+        <h2 class="text-2xl font-bold mb-4">My Progress</h2>
+        <div class="flex items-center gap-4">
+            <div class="flex-1">
+                <div class="w-full bg-base-300 rounded-full h-4">
+                    <div class="bg-success h-4 rounded-full" style="width: {{ completion_percentage }}%"></div>
+                </div>
+            </div>
+            <span class="text-2xl font-bold">{{ completion_percentage }}%</span>
+        </div>
+        <p class="text-sm text-base-content/60 mt-2">You have completed {{ completed_tasks }} out of {{ total_tasks }} tasks</p>
+    </div>
+
+    <!-- Employee Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <a href="{% url 'tasks:task_list' %}?priority=high" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">High Priority</h3>
+            <p class="text-3xl font-bold mt-3 text-error">{{ high_priority_tasks }}</p>
+        </a>
+        <a href="{% url 'tasks:task_list' %}?sort=due_date" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">Overdue</h3>
+            <p class="text-3xl font-bold mt-3 text-error">{{ overdue_tasks }}</p>
+        </a>
+        <a href="{% url 'tasks:task_list' %}" class="block bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow cursor-pointer">
+            <h3 class="text-lg font-semibold">Due Today</h3>
+            <p class="text-3xl font-bold mt-3 text-warning">{{ due_today_tasks }}</p>
+        </a>
+    </div>
+
+    <!-- Employee Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <div class="bg-base-100 rounded-xl shadow p-6">
+            <h2 class="text-2xl font-bold mb-4">My Task Status</h2>
+            <div class="h-64">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+        <div class="bg-base-100 rounded-xl shadow p-6">
+            <h2 class="text-2xl font-bold mb-4">My Task Priority</h2>
+            <div class="h-64">
+                <canvas id="priorityChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Recent Tasks -->
+    <div class="bg-base-100 rounded-xl shadow p-6 mb-8">
+        <h2 class="text-2xl font-bold mb-5">My Recent Tasks</h2>
+        {% for task in recent_tasks %}
+        <a href="{% url 'tasks:task_detail' task.id %}" class="block border-b last:border-b-0 py-4 hover:bg-base-200 transition-colors rounded">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h3 class="font-semibold">{{ task.title }}</h3>
+                    <p class="text-sm text-base-content/60">Project: {{ task.project.name }}</p>
+                </div>
+                <div class="flex gap-2">
+                    <span class="badge {% if task.status == "completed" %}badge-success{% elif task.status == "progress" %}badge-warning{% else %}badge-error{% endif %}">{{ task.status }}</span>
+                    <span class="badge {% if task.priority == "high" %}badge-error{% elif task.priority == "medium" %}badge-warning{% else %}badge-info{% endif %}">{{ task.priority }}</span>
+                </div>
+            </div>
+            {% if task.due_date %}
+            <p class="text-sm font-medium {% if task.due_date < today and task.status != "completed" %}text-error{% else %}text-info{% endif %} mt-2">
+                Due: {{ task.due_date|date:"M d, Y" }}
+            </p>
+            {% endif %}
+        </a>
+        {% empty %}
+        <p class="text-base-content/60">No tasks assigned yet.</p>
+        {% endfor %}
+    </div>
+
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <div class="bg-base-100 rounded-xl shadow p-6 mb-8">
+        <h2 class="text-2xl font-bold mb-5">Quick Actions</h2>
+        <div class="flex flex-wrap gap-4">
+            <a href="{% url 'users:user_profile' %}" class="btn btn-primary">View Profile</a>
+            <a href="{% url 'tasks:task_list' %}" class="btn btn-accent">Manage Tasks</a>
+            <a href="{% url 'tasks:project_list' %}" class="btn btn-info">View Projects</a>
+            {% if is_manager %}
+                <a href="{% url 'tasks:create_task' %}" class="btn btn-secondary">Create Task</a>
+                <a href="{% url 'tasks:project_create' %}" class="btn btn-warning">Create Project</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Account Information -->
+    <div class="bg-base-100 rounded-xl shadow p-6">
+        <h2 class="text-2xl font-bold mb-5">Account Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <p class="text-base-content/60">Name</p>
+                <p class="font-semibold">{{ request.user.get_display_name }}</p>
+            </div>
+            <div>
+                <p class="text-base-content/60">Email</p>
+                <p class="font-semibold">{{ request.user.email }}</p>
+            </div>
+            <div>
+                <p class="text-base-content/60">Phone</p>
+                <p class="font-semibold">{{ request.user.phone|default:"Not provided" }}</p>
+            </div>
+            <div>
+                <p class="text-base-content/60">Role</p>
+                <p class="font-semibold">{{ request.user.get_user_type_display }}</p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script>
+// Status Chart (Pie)
+const statusCtx = document.getElementById('statusChart').getContext('2d');
+new Chart(statusCtx, {
+    type: 'pie',
+    data: {
+        labels: ['To Do', 'In Progress', 'Completed'],
+        datasets: [{
+            data: [{{ todo_tasks }}, {{ in_progress_tasks }}, {{ completed_tasks }}],
+            backgroundColor: ['#f87171', '#fbbf24', '#34d399'],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
+
+// Priority Chart (Bar)
+const priorityCtx = document.getElementById('priorityChart').getContext('2d');
+new Chart(priorityCtx, {
+    type: 'bar',
+    data: {
+        labels: ['Low', 'Medium', 'High'],
+        datasets: [{
+            label: 'Tasks',
+            data: [{{ priority_data.low }}, {{ priority_data.medium }}, {{ priority_data.high }}],
+            backgroundColor: ['#60a5fa', '#fbbf24', '#f87171'],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+            y: {
+                beginAtZero: true,
+                ticks: { stepSize: 1 }
+            }
+        }
+    }
+});
+
+// Tasks Over Time Chart (Line)
+const lineCtx = document.getElementById('tasksOverTimeChart');
+if (lineCtx) {
+    const tasksOverTimeLabels = {{ tasks_per_day_labels|safe }};
+    const tasksOverTimeValues = {{ tasks_per_day_values|safe }};
+    new Chart(lineCtx.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: tasksOverTimeLabels,
+            datasets: [{
+                label: 'Tasks Created',
+                data: tasksOverTimeValues,
+                borderColor: '#3b82f6',
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                fill: true,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                }
+            }
+        }
+    });
+}
+</script>
+
+{% endblock %}

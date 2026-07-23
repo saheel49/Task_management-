@@ -1,8 +1,13 @@
 {% extends 'error_base.html' %}
 {% load i18n %}
 {% block error_details %}
-  <h1 class="text-3xl font-bold mb-2">{% translate "Shucks. We couldn't find that." %}</h1>
-  <h2 class="text-xl mb-1">
-    {% translate "If you think this page should exist, double-check that you are signed in as the right person." %}
-  </h2>
+  <div class="text-center">
+    <h1 class="text-6xl font-bold text-primary mb-4">{% translate "404" %}</h1>
+    <h2 class="text-2xl font-semibold mb-4">{% translate "Page Not Found" %}</h2>
+    <p class="text-base-content/60 mb-6">{% translate "Sorry, the page you are looking for doesn't exist or has been moved." %}</p>
+    <div class="flex flex-wrap gap-3 justify-center">
+      <a href="{% url 'web:home' %}" class="btn btn-primary">{% translate "Go Home" %}</a>
+      <a href="{% url 'dashboard:dashboard' %}" class="btn btn-outline">{% translate "Go to Dashboard" %}</a>
+    </div>
+  </div>
 {% endblock %}

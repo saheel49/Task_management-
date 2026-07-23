@@ -36,7 +36,7 @@ services:
       args:
         MY_UID: ${MY_UID:-1000}
         MY_GID: ${MY_GID:-1000}
-    image: django-template:latest
+    image: task-manager:latest
     # Apply migrations and gather static files, then serve via gunicorn.
     command: >
       bash -c "python manage.py migrate --noinput &&
@@ -66,7 +66,7 @@ services:
       args:
         MY_UID: ${MY_UID:-1000}
         MY_GID: ${MY_GID:-1000}
-    image: django-template:latest
+    image: task-manager:latest
     command: celery -A config worker --beat -l INFO
     env_file:
       - ./.env.prod

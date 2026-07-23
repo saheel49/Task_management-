@@ -1,5 +1,5 @@
 """
-Base Django settings for django-template project.
+Base Django settings for Task Manager project.
 
 Shared settings imported by the environment-specific modules in this package:
 `dev.py` (local development, the default) and `prod.py` (production).
@@ -37,7 +37,7 @@ DEBUG = env.bool("DEBUG", default=True)
 ENABLE_DEBUG_TOOLBAR = env.bool("ENABLE_DEBUG_TOOLBAR", default=False) and "test" not in sys.argv
 
 # Note: It is not recommended to set ALLOWED_HOSTS to "*" in production
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["*"])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 
 
 # Application definition
@@ -73,15 +73,19 @@ THIRD_PARTY_APPS = [
 PROJECT_APPS = [
     "apps.users.apps.UserConfig",
     "apps.web",
+    "tasks.apps.TasksConfig",
+    "apps.dashboard.apps.DashboardConfig",
 ]
-
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 
 # `apps.web` ships a custom `runserver` command (it auto-creates a dev superuser in DEBUG).
 # Django resolves duplicate management commands to the app listed *earliest* in INSTALLED_APPS,
 # so `apps.web` must come before `django.contrib.staticfiles`, which also defines `runserver`.
 INSTALLED_APPS.remove("apps.web")
-INSTALLED_APPS.insert(INSTALLED_APPS.index("django.contrib.staticfiles"), "apps.web")
+INSTALLED_APPS.insert(
+    INSTALLED_APPS.index("django.contrib.staticfiles"),
+    "apps.web",
+)
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -176,7 +180,8 @@ DATABASES = {
 # future changes much easier.
 AUTH_USER_MODEL = "users.CustomUser"
 LOGIN_URL = "account_login"
-LOGIN_REDIRECT_URL = "/"
+LOGIN_REDIRECT_URL = "dashboard:dashboard"
+LOGOUT_REDIRECT_URL = "account_login"
 
 # Password validation
 # https://docs.djangoproject.com/en/stable/ref/settings/#auth-password-validators
@@ -300,7 +305,7 @@ FORMS_URLFIELD_ASSUME_HTTPS = True
 
 # default email used by your server
 SERVER_EMAIL = env("SERVER_EMAIL", default="noreply@localhost:8000")
-DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="achinga.chris@gmail.com")
+DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@localhost:8000")
 
 # The default value will print emails to the console, but you can change that here
 # and in your environment.
@@ -316,7 +321,7 @@ EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.
 # see https://github.com/anymail/django-anymail for more details/examples
 # EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 
-EMAIL_SUBJECT_PREFIX = "[django-template] "
+EMAIL_SUBJECT_PREFIX = "[Task Manager] "
 
 # Django sites
 
@@ -335,8 +340,8 @@ REST_FRAMEWORK = {
 
 
 SPECTACULAR_SETTINGS = {
-    "TITLE": "django-template",
-    "DESCRIPTION": "my django template",  # noqa: E501
+    "TITLE": "Task Manager",
+    "DESCRIPTION": "Task Manager API",
     "VERSION": "0.1.0",
     "SERVE_INCLUDE_SCHEMA": False,
     "SWAGGER_UI_SETTINGS": {
@@ -381,22 +386,22 @@ SCHEDULED_TASKS: dict[str, Any] = {
 }
 
 
-# Pegasus config
+# Project config
 
 # replace any values below with specifics for your project
 PROJECT_METADATA = {
-    "NAME": gettext_lazy("django-template"),
-    "URL": "http://localhost:8000",
-    "DESCRIPTION": gettext_lazy("my django template"),  # noqa: E501
-    "IMAGE": "https://upload.wikimedia.org/wikipedia/commons/2/20/PEO-pegasus_black.svg",
+    "NAME": gettext_lazy("Task Manager"),
+    "URL": env("PROJECT_URL", default="http://localhost:8000"),
+    "DESCRIPTION": gettext_lazy("Task Manager"),
+    "IMAGE": env("PROJECT_IMAGE", default="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Checkmark_green.svg/1024px-Checkmark_green.svg.png"),
     "KEYWORDS": "SaaS, django",
-    "CONTACT_EMAIL": "achinga.chris@gmail.com",
+    "CONTACT_EMAIL": env("CONTACT_EMAIL", default="noreply@localhost:8000"),
 }
 
 # set this to True in production to have URLs generated with https instead of http
 USE_HTTPS_IN_ABSOLUTE_URLS = env.bool("USE_HTTPS_IN_ABSOLUTE_URLS", default=False)
 
-ADMINS = ["achinga.chris@gmail.com"]
+ADMINS = env.list("ADMINS", default=[])
 
 # Add your google analytics ID to the environment to connect to Google Analytics
 GOOGLE_ANALYTICS_ID = env("GOOGLE_ANALYTICS_ID", default="")

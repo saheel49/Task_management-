@@ -1,0 +1,54 @@
+{% extends "web/base.html" %}
+{% load static %}
+
+{% block page_title %}User Details{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-6 py-10">
+    {% include 'web/components/breadcrumbs.html' with breadcrumbs=breadcrumbs %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- User Card -->
+        <div class="bg-base-100 rounded-xl shadow p-6">
+            <div class="flex flex-col items-center text-center">
+                <div class="avatar mb-4">
+                    <div class="w-24 h-24 rounded-full">
+                        <img src="{{ user.avatar_url }}" alt="{{ user.get_display_name }}" />
+                    </div>
+                </div>
+                <h2 class="text-2xl font-bold">{{ user.get_display_name }}</h2>
+                <p class="text-base-content/60">{{ user.email }}</p>
+                <span class="badge {% if user.user_type == 'manager' %}badge-primary{% else %}badge-secondary{% endif %} mt-2">{{ user.get_user_type_display }}</span>
+                {% if user.phone %}<p class="text-sm text-base-content/60 mt-2">{{ user.phone }}</p>{% endif %}
+                {% if user.bio %}<p class="text-sm text-base-content/60 mt-2">{{ user.bio }}</p>{% endif %}
+            </div>
+        </div>
+
+        <!-- User Tasks -->
+        <div class="lg:col-span-2 bg-base-100 rounded-xl shadow p-6">
+            <h3 class="text-2xl font-bold mb-4">Assigned Tasks</h3>
+            <div class="grid gap-4">
+                {% for task in user_tasks %}
+                <a href="{% url 'tasks:task_detail' task.id %}" class="block border border-base-300 rounded-xl p-4 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-semibold text-lg">{{ task.title }}</h4>
+                            <p class="text-sm text-base-content/60">Project: {{ task.project.name }}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <span class="badge {% if task.status == 'completed' %}badge-success{% elif task.status == 'progress' %}badge-warning{% else %}badge-error{% endif %}">{{ task.status }}</span>
+                            <span class="badge {% if task.priority == 'high' %}badge-error{% elif task.priority == 'medium' %}badge-warning{% else %}badge-info{% endif %}">{{ task.priority }}</span>
+                        </div>
+                    </div>
+                    {% if task.due_date %}
+                    <p class="text-sm mt-2 {% if task.due_date < today and task.status != 'completed' %}text-error{% else %}text-base-content/60{% endif %}">Due: {{ task.due_date|date:"M d, Y" }}</p>
+                    {% endif %}
+                </a>
+                {% empty %}
+                <p class="text-base-content/60">No tasks assigned to this user.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

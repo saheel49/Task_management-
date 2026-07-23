@@ -1,8 +1,13 @@
 {% extends 'error_base.html' %}
 {% load i18n %}
 {% block error_details %}
-  <h1 class="text-3xl font-bold mb-2">{% translate "Shucks. That's an error." %}</h1>
-  <h2 class="text-xl mb-1">
-    {% translate "Please try again, and if you continue to get this message, contact support." %}
-  </h2>
+  <div class="text-center">
+    <h1 class="text-6xl font-bold text-error mb-4">{% translate "500" %}</h1>
+    <h2 class="text-2xl font-semibold mb-4">{% translate "Server Error" %}</h2>
+    <p class="text-base-content/60 mb-6">{% translate "Something went wrong on our end. Please try again later or contact support if the problem persists." %}</p>
+    <div class="flex flex-wrap gap-3 justify-center">
+      <a href="{% url 'web:home' %}" class="btn btn-primary">{% translate "Go Home" %}</a>
+      <a href="{% url 'dashboard:dashboard' %}" class="btn btn-outline">{% translate "Go to Dashboard" %}</a>
+    </div>
+  </div>
 {% endblock %}

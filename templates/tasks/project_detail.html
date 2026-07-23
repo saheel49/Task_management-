@@ -1,0 +1,97 @@
+{% extends "web/base.html" %}
+
+{% load static %}
+
+{% block page_title %}
+{{ project.name }}
+{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-6 py-10">
+
+    {% include 'web/components/breadcrumbs.html' with breadcrumbs=breadcrumbs %}
+
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-4xl font-bold">{{ project.name }}</h1>
+        <div class="flex gap-2">
+            <a href="{% url 'tasks:project_update' project.id %}" class="btn btn-warning">Edit</a>
+            <a href="{% url 'tasks:project_delete' project.id %}" class="btn btn-error">Delete</a>
+        </div>
+    </div>
+
+    <!-- Project Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div class="bg-base-100 rounded-xl shadow p-6">
+            <h3 class="text-lg font-semibold">Total Tasks</h3>
+            <p class="text-3xl font-bold mt-3">{{ total_tasks }}</p>
+        </div>
+        <div class="bg-base-100 rounded-xl shadow p-6">
+            <h3 class="text-lg font-semibold">Completed</h3>
+            <p class="text-3xl font-bold mt-3 text-success">{{ completed_tasks }}</p>
+        </div>
+        <div class="bg-base-100 rounded-xl shadow p-6">
+            <h3 class="text-lg font-semibold">Completion</h3>
+            <p class="text-3xl font-bold mt-3 text-primary">{{ completion_percentage }}%</p>
+        </div>
+    </div>
+
+    <!-- Completion Bar -->
+    <div class="bg-base-100 rounded-xl shadow p-6 mb-8">
+        <h2 class="text-2xl font-bold mb-4">Progress</h2>
+        <div class="w-full bg-gray-200 rounded-full h-4">
+            <div class="bg-success h-4 rounded-full" style="width: {{ completion_percentage }}%"></div>
+        </div>
+    </div>
+
+    <!-- Project Information -->
+    <div class="bg-base-100 rounded-xl shadow p-6 mb-8">
+        <h2 class="text-2xl font-bold mb-4">Project Information</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <p class="text-base-content/60">Name</p>
+                <p class="font-semibold">{{ project.name }}</p>
+            </div>
+            <div>
+                <p class="text-base-content/60">Status</p>
+                <span class="badge badge-secondary">{{ project.status }}</span>
+            </div>
+            <div class="md:col-span-2">
+                <p class="text-base-content/60">Description</p>
+                <p class="font-semibold">{{ project.description|default:"No description provided." }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Tasks -->
+    <div class="bg-base-100 rounded-xl shadow p-6">
+        <h2 class="text-2xl font-bold mb-5">Project Tasks</h2>
+
+        {% for task in tasks %}
+        <div class="border-b last:border-b-0 py-4">
+            <h3 class="font-semibold">{{ task.title }}</h3>
+            <p class="text-sm text-base-content/60">Assigned to: {{ task.assigned_to.get_display_name }}</p>
+            <div class="mt-2 flex gap-2">
+                {% if task.status == "completed" %}
+                    <span class="badge badge-success">{{ task.status }}</span>
+                {% elif task.status == "progress" %}
+                    <span class="badge badge-warning">{{ task.status }}</span>
+                {% else %}
+                    <span class="badge badge-error">{{ task.status }}</span>
+                {% endif %}
+
+                {% if task.priority == "high" %}
+                    <span class="badge badge-error">{{ task.priority }}</span>
+                {% elif task.priority == "medium" %}
+                    <span class="badge badge-warning">{{ task.priority }}</span>
+                {% else %}
+                    <span class="badge badge-info">{{ task.priority }}</span>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p class="text-base-content/60">No tasks in this project yet.</p>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

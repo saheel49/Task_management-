@@ -1,44 +1,88 @@
 {% load i18n %}
 <li class="menu-title">
-  <span>{% translate "Application" %}</span>
+  <span>{% translate "Main" %}</span>
 </li>
 <li>
-  <a href="{% url 'web:home' %}" {% if active_tab == 'dashboard' %}class="menu-active"{% endif %}>
+  <a href="{% url 'dashboard:dashboard' %}" {% if request.path == '/dashboard/' %}class="menu-active"{% endif %}>
     <i class="fa fa-home h-4 w-4"></i>
     {% translate "Dashboard" %}
   </a>
 </li>
-{% if not user.is_anonymous %}
+
+{% if user.is_authenticated %}
+<li class="menu-title">
+  <span>{% translate "Tasks" %}</span>
+</li>
+<li>
+  <a href="{% url 'tasks:task_list' %}" {% if request.path|slice:'7' == '/tasks/' and request.path|slice:'18' != '/tasks/projects/' %}class="menu-active"{% endif %}>
+    <i class="fa fa-list-check h-4 w-4"></i>
+    {% translate "Task List" %}
+  </a>
+</li>
+{% if user.is_superuser or user.user_type == "manager" %}
+<li>
+  <a href="{% url 'tasks:create_task' %}" {% if request.path == '/tasks/create/' %}class="menu-active"{% endif %}>
+    <i class="fa fa-plus h-4 w-4"></i>
+    {% translate "Create Task" %}
+  </a>
+</li>
+{% endif %}
+
+<li class="menu-title">
+  <span>{% translate "Projects" %}</span>
+</li>
+<li>
+  <a href="{% url 'tasks:project_list' %}" {% if request.path|slice:'18' == '/tasks/projects/' or request.path|slice:'7' == '/tasks/' and request.path|slice:'18' == '/tasks/projects' %}class="menu-active"{% endif %}>
+    <i class="fa fa-folder h-4 w-4"></i>
+    {% translate "Project List" %}
+  </a>
+</li>
+{% if user.is_superuser or user.user_type == "manager" %}
+<li>
+  <a href="{% url 'tasks:project_create' %}" {% if request.path == '/tasks/projects/create/' or request.path == '/tasks/projects/create' %}class="menu-active"{% endif %}>
+    <i class="fa fa-plus h-4 w-4"></i>
+    {% translate "Create Project" %}
+  </a>
+</li>
+{% endif %}
+
 <li class="menu-title">
   <span>{% translate "My Account" %}</span>
 </li>
 <ul class="menu-list">
   <li>
-    <a href="{% url 'users:user_profile' %}" {% if active_tab == 'profile' %}class="menu-active"{% endif %}>
+    <a href="{% url 'users:user_profile' %}" {% if request.path == '/users/profile/' %}class="menu-active"{% endif %}>
       <i class="fa fa-user h-4 w-4"></i>
       {% translate "Profile" %}
     </a>
   </li>
   {% if user.has_usable_password %}
   <li>
-    <a href="{% url 'account_change_password' %}" {% if 'accounts/password/change' in request.path %}class="menu-active"{% endif %}>
+    <a href="{% url 'account_change_password' %}" {% if request.path == '/accounts/password/change/' %}class="menu-active"{% endif %}>
       <i class="fa fa-unlock-alt h-4 w-4"></i>
       {% translate "Change Password" %}
     </a>
   </li>
   {% endif %}
   <li>
-    <a href="{% url 'account_logout' %}" data-logout-link {% if 'accounts/logout' in request.path %}class="menu-active"{% endif %}>
+    <a href="{% url 'account_logout' %}" data-logout-link {% if request.path == '/accounts/logout/' %}class="menu-active"{% endif %}>
       <i class="fa fa-sign-out h-4 w-4"></i>
       {% translate "Sign out" %}
     </a>
   </li>
 </ul>
-{% endif %}
+
 {% if user.is_superuser %}
 <li class="menu-title">
   <span>{% translate "Admin" %}</span>
 </li>
 <ul class="menu-list">
+  <li>
+    <a href="{% url 'admin:index' %}" {% if request.path == '/admin/' or request.path == '/admin' %}class="menu-active"{% endif %}>
+      <i class="fa fa-cog h-4 w-4"></i>
+      {% translate "Admin Panel" %}
+    </a>
+  </li>
 </ul>
+{% endif %}
 {% endif %}

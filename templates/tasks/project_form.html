@@ -1,0 +1,47 @@
+{% extends "web/base.html" %}
+
+{% load static %}
+
+{% block page_title %}
+{{ page_title }}
+{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-6 py-10">
+    <div class="max-w-2xl mx-auto">
+
+        {% include 'web/components/breadcrumbs.html' with breadcrumbs=breadcrumbs %}
+
+        <h1 class="text-3xl font-bold mb-6">{{ page_title }}</h1>
+
+        <form method="post" class="bg-base-100 shadow rounded-xl p-6">
+            {% csrf_token %}
+
+            <div class="form-control mb-5">
+                <label class="label"><span class="label-text font-semibold">Project Name</span></label>
+                <input type="text" name="name" value="{{ project.name|default:'' }}" class="input input-bordered w-full" required>
+            </div>
+
+            <div class="form-control mb-5">
+                <label class="label"><span class="label-text font-semibold">Description</span></label>
+                <textarea name="description" rows="4" class="textarea textarea-bordered w-full">{{ project.description|default:'' }}</textarea>
+            </div>
+
+            <div class="form-control mb-5">
+                <label class="label"><span class="label-text font-semibold">Status</span></label>
+                <select name="status" class="select select-bordered w-full">
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if project.status == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="flex gap-3">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a href="{% url 'tasks:project_list' %}" class="btn btn-ghost">Cancel</a>
+            </div>
+        </form>
+
+    </div>
+</div>
+{% endblock %}
