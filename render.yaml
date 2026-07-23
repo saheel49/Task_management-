@@ -60,5 +60,17 @@ services:
         value: Admin
       - key: ADMIN_LAST_NAME
         value: User
-      # Set ADMIN_PASSWORD to match your local dev credentials if you want
-      # the same login across environments. If unset, defaults to "admin".
+      # Set ADMIN_PASSWORD to match your local dev credentials.
+      # If unset, it defaults to "admin".
+      - key: ADMIN_PASSWORD
+        value: admin
+      # Default employee user (optional). If both EMPLOYEE_EMAIL and EMPLOYEE_PASSWORD
+      # are set, the post-deploy command will create/update this user as well.
+      - key: EMPLOYEE_EMAIL
+        value: employee@test.com
+      - key: EMPLOYEE_PASSWORD
+        value: employee123
+      - key: EMPLOYEE_FIRST_NAME
+        value: Employee
+      - key: EMPLOYEE_LAST_NAME
+        value: User

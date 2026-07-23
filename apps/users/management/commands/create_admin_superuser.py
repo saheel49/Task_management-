@@ -1,46 +1,91 @@
+import os
+
 from django.core.management.base import BaseCommand
 
 from apps.users.models import CustomUser
 
 
-class Command(BaseCommand):
-    help = "Create or update a superuser from environment variables for production deployment."
+def ensure_user(email, password, first_name="", last_name="", is_staff=False, is_superuser=False):
+    user, created = CustomUser.objects.get_or_create(
+        email=email,
+        defaults={
+            "username": email,
+            "first_name": first_name,
+            "last_name": last_name,
+            "is_staff": is_staff,
+            "is_superuser": is_superuser,
+            "user_type": "manager" if is_superuser else "employee",
+        },
+    )
 
-    def add_arguments(self, parser):
-        parser.add_argument("--email", type=str, help="Admin email (defaults to ADMIN_EMAIL env var)")
-        parser.add_argument("--password", type=str, help="Admin password (defaults to ADMIN_PASSWORD env var)")
-        parser.add_argument("--first-name", type=str, default="Admin", help="Admin first name")
-        parser.add_argument("--last-name", type=str, default="User", help="Admin last name")
+    if created:
+        user.set_password(password)
+        user.save()
+    else:
+        changed = False
+        if user.username != email:
+            user.username = email
+            changed = True
+        if user.first_name != first_name:
+            user.first_name = first_name
+            changed = True
+        if user.last_name != last_name:
+            user.last_name = last_name
+            changed = True
+        if user.is_staff != is_staff:
+            user.is_staff = is_staff
+            changed = True
+        if user.is_superuser != is_superuser:
+            user.is_superuser = is_superuser
+            changed = True
+        if user.user_type != ("manager" if is_superuser else "employee"):
+            user.user_type = "manager" if is_superuser else "employee"
+            changed = True
+        if changed:
+            user.save()
+
+    return user, created
+
+
+class Command(BaseCommand):
+    help = "Create or update default users from environment variables for production deployment."
 
     def handle(self, *args, **options):
-        import os
+        results = []
 
-        email = options["email"] or os.environ.get("ADMIN_EMAIL", "admin@example.com")
-        password = options["password"] or os.environ.get("ADMIN_PASSWORD", "admin")
-        first_name = options["first_name"] or os.environ.get("ADMIN_FIRST_NAME", "Admin")
-        last_name = options["last_name"] or os.environ.get("ADMIN_LAST_NAME", "User")
+        admin_email = os.environ.get("ADMIN_EMAIL", "admin@example.com")
+        admin_password = os.environ.get("ADMIN_PASSWORD", "admin")
+        admin_first_name = os.environ.get("ADMIN_FIRST_NAME", "Admin")
+        admin_last_name = os.environ.get("ADMIN_LAST_NAME", "User")
 
-        user, created = CustomUser.objects.get_or_create(
-            email=email,
-            defaults={
-                "username": email,
-                "first_name": first_name,
-                "last_name": last_name,
-                "is_staff": True,
-                "is_superuser": True,
-            },
+        user, created = ensure_user(
+            email=admin_email,
+            password=admin_password,
+            first_name=admin_first_name,
+            last_name=admin_last_name,
+            is_staff=True,
+            is_superuser=True,
         )
+        results.append((admin_email, created))
 
-        if created:
-            user.set_password(password)
-            user.save()
-            self.stdout.write(self.style.SUCCESS(f"Created superuser '{email}'"))
-        else:
-            user.is_staff = True
-            user.is_superuser = True
-            user.first_name = first_name
-            user.last_name = last_name
-            user.save()
-            self.stdout.write(f"Superuser '{email}' already exists. Ensuring admin flags are set.")
+        employee_email = os.environ.get("EMPLOYEE_EMAIL")
+        employee_password = os.environ.get("EMPLOYEE_PASSWORD")
+        employee_first_name = os.environ.get("EMPLOYEE_FIRST_NAME", "Employee")
+        employee_last_name = os.environ.get("EMPLOYEE_LAST_NAME", "User")
 
-        self.stdout.write(self.style.SUCCESS("Superuser is ready for production login."))
+        if employee_email and employee_password:
+            user, created = ensure_user(
+                email=employee_email,
+                password=employee_password,
+                first_name=employee_first_name,
+                last_name=employee_last_name,
+                is_staff=False,
+                is_superuser=False,
+            )
+            results.append((employee_email, created))
+
+        for email, created in results:
+            status = "created" if created else "updated/verified"
+            self.stdout.write(self.style.SUCCESS(f"User '{email}' {status}."))
+
+        self.stdout.write(self.style.SUCCESS("Default users are ready for production login."))
