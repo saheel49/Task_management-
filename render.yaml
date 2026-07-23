@@ -75,23 +75,23 @@ services:
       - key: EMPLOYEE_LAST_NAME
         value: User
 
-      # --- SMTP Email Configuration -------------------------------------------
-      # Configure these with your real SMTP provider (e.g. Gmail, SendGrid, Mailgun)
-      # to enable password reset emails. If left blank, emails will not be sent.
+      # --- SMTP Email Configuration (Gmail example) ---------------------------
+      # Use these exact values for Gmail. Replace with your own SMTP provider
+      # if you are not using Gmail.
       - key: EMAIL_BACKEND
         value: django.core.mail.backends.smtp.EmailBackend
       - key: DEFAULT_FROM_EMAIL
-        value: noreply@yourdomain.com
+        value: saheelamir49@gmail.com
       - key: SERVER_EMAIL
-        value: noreply@yourdomain.com
+        value: saheelamir49@gmail.com
       - key: EMAIL_HOST
         value: smtp.gmail.com
       - key: EMAIL_PORT
         value: "587"
       - key: EMAIL_HOST_USER
-        value: your-email@gmail.com
+        value: saheelamir49@gmail.com
       - key: EMAIL_HOST_PASSWORD
-        value: your-app-password
+        value: <YOUR_GMAIL_APP_PASSWORD>
       - key: EMAIL_USE_TLS
         value: "True"
       - key: EMAIL_USE_SSL
