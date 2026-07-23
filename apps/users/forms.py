@@ -132,6 +132,11 @@ class DebugResetPasswordForm(ResetPasswordForm):
     def save(self, request, **kwargs):
         email = self.cleaned_data["email"]
         logger.info("Attempting to send password reset email to: %s", email)
+        logger.info("Email backend: %s", getattr(settings, "EMAIL_BACKEND", "not set"))
+        logger.info("Email host: %s", getattr(settings, "EMAIL_HOST", "not set"))
+        logger.info("Email port: %s", getattr(settings, "EMAIL_PORT", "not set"))
+        logger.info("Email host user: %s", getattr(settings, "EMAIL_HOST_USER", "not set"))
+        logger.info("Default from email: %s", getattr(settings, "DEFAULT_FROM_EMAIL", "not set"))
         try:
             result = super().save(request, **kwargs)
             logger.info("Password reset email sent successfully to: %s", email)

@@ -1,6 +1,8 @@
 import os
 
 from allauth.account.models import EmailAddress
+from django.conf import settings
+from django.contrib.sites.models import Site
 from django.core.management.base import BaseCommand
 
 from apps.users.models import CustomUser
@@ -61,6 +63,17 @@ def ensure_user(email, password, first_name="", last_name="", is_staff=False, is
     return user, created
 
 
+def ensure_site_domain():
+    project_url = settings.PROJECT_METADATA.get("URL", "").replace("http://", "").replace("https://", "")
+    if project_url and project_url != "localhost:8000":
+        site, created = Site.objects.get_or_create(pk=settings.SITE_ID)
+        if site.domain != project_url:
+            site.domain = project_url
+            site.save()
+            return f"Updated site domain to: {project_url}"
+    return None
+
+
 class Command(BaseCommand):
     help = "Create or update default users from environment variables for production deployment."
 
@@ -101,5 +114,9 @@ class Command(BaseCommand):
         for email, created in results:
             status = "created" if created else "updated/verified"
             self.stdout.write(self.style.SUCCESS(f"User '{email}' {status}."))
+
+        site_result = ensure_site_domain()
+        if site_result:
+            self.stdout.write(self.style.SUCCESS(site_result))
 
         self.stdout.write(self.style.SUCCESS("Default users are ready for production login."))
