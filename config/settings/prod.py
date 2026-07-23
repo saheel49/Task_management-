@@ -51,6 +51,13 @@ CSRF_COOKIE_SECURE = True
 
 USE_HTTPS_IN_ABSOLUTE_URLS = True
 
+# Auto-populate CSRF trusted origins from PROJECT_URL in production so POSTs
+# work behind Render's TLS-terminating proxy without manual per-request tuning.
+# Environment-provided CSRF_TRUSTED_ORIGINS takes precedence if explicitly set.
+if not env("CSRF_TRUSTED_ORIGINS", default=None):
+    if PROJECT_URL and PROJECT_URL not in ("http://localhost:8000",):
+        CSRF_TRUSTED_ORIGINS = [PROJECT_URL]
+
 # If you don't want to use environment variables to set production hosts you can add them here
 # ALLOWED_HOSTS = ["example.com"]
 

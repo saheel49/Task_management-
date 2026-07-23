@@ -19,10 +19,12 @@ services:
     dockerfilePath: ./Dockerfile
     # Build Command is ignored for Docker; the image is built from the Dockerfile.
     buildCommand: echo "Skipping build command for Docker deployment"
-    # Start command overrides the Dockerfile CMD. This must match the Procfile.
+    # Start command overrides the Dockerfile CMD. The Docker entrypoint script
+    # handles migrations, collectstatic, and database readiness before executing this command.
     startCommand: gunicorn config.wsgi:application --log-file -
     # Release command runs once per deploy in an ephemeral container *after* the
-    # image is built but *before* any web instances are started.
+    # image is built but *before* any web instances are started. Kept as a safety net;
+    # the web container's entrypoint also runs migrations.
     releaseCommand: python manage.py migrate --noinput
     # Health check path — create this endpoint if you want Render to detect crashes
     # healthCheckPath: /health/

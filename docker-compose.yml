@@ -37,14 +37,9 @@ services:
         MY_UID: ${MY_UID:-1000}
         MY_GID: ${MY_GID:-1000}
     image: task-manager:latest
-    # Apply migrations and gather static files, then serve via gunicorn.
-    command: >
-      bash -c "python manage.py migrate --noinput &&
-               python manage.py collectstatic --noinput &&
-               exec gunicorn config.wsgi:application
-                 --bind 0.0.0.0:8000
-                 --workers $${GUNICORN_WORKERS:-3}
-                 --access-logfile - --error-logfile -"
+    # The Docker entrypoint script handles DB readiness, migrations, and collectstatic.
+    # Use list form so the entrypoint's `exec "$@"` receives each word as a separate argument.
+    command: ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "${GUNICORN_WORKERS:-3}", "--access-logfile", "-", "--error-logfile", "-"]
     env_file:
       - ./.env.prod
     ports:
@@ -67,7 +62,8 @@ services:
         MY_UID: ${MY_UID:-1000}
         MY_GID: ${MY_GID:-1000}
     image: task-manager:latest
-    command: celery -A config worker --beat -l INFO
+    # Use list form so the entrypoint script's `exec "$@"` receives separate words.
+    command: ["celery", "-A", "config", "worker", "--beat", "-l", "INFO"]
     env_file:
       - ./.env.prod
     volumes:
