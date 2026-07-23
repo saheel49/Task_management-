@@ -345,6 +345,22 @@ ANYMAIL = {
 # see https://github.com/anymail/django-anymail for more details/examples
 # EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 
+# Log effective email configuration at startup for debugging.
+# This makes it obvious in container logs which backend/host/port are in use.
+import logging  # noqa: E402
+
+logger = logging.getLogger(__name__)
+logger.info(
+    "Email config | backend=%s host=%s port=%s user=%s tls=%s ssl=%s timeout=%s",
+    EMAIL_BACKEND,
+    EMAIL_HOST,
+    EMAIL_PORT,
+    EMAIL_HOST_USER,
+    EMAIL_USE_TLS,
+    EMAIL_USE_SSL,
+    EMAIL_TIMEOUT,
+)
+
 EMAIL_SUBJECT_PREFIX = "[Task Manager] "
 
 # Django sites
