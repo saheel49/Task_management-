@@ -1,7 +1,7 @@
 import logging
 
 import requests
-from allauth.account.forms import SignupForm
+from allauth.account.forms import ResetPasswordForm, SignupForm
 from django import forms
 from django.conf import settings
 from django.contrib.auth.forms import UserChangeForm
@@ -11,6 +11,8 @@ from django.utils.translation import gettext_lazy as _
 
 from .helpers import validate_profile_picture
 from .models import CustomUser
+
+logger = logging.getLogger(__name__)
 
 
 class TurnstileSignupForm(SignupForm):
@@ -119,3 +121,23 @@ class TermsSignupForm(TurnstileSignupForm):
         )
 
         self.fields["terms_agreement"].label = mark_safe(_("I agree to the {terms_link}").format(terms_link=link))
+
+
+class DebugResetPasswordForm(ResetPasswordForm):
+    def clean_email(self):
+        email = super().clean_email()
+        logger.info("Password reset requested for email: %s", email)
+        return email
+
+    def save(self, request, **kwargs):
+        email = self.cleaned_data["email"]
+        logger.info("Attempting to send password reset email to: %s", email)
+        try:
+            result = super().save(request, **kwargs)
+            logger.info("Password reset email sent successfully to: %s", email)
+            return result
+        except Exception as e:
+            logger.error("Failed to send password reset email to %s: %s", email, str(e), exc_info=True)
+            raise forms.ValidationError(
+                _("Unable to send password reset email. Please try again later or contact support.")
+            ) from e
