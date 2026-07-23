@@ -1,6 +1,8 @@
+import logging
 from datetime import date
 
 from allauth.account.models import EmailAddress
+from allauth.account.views import PasswordResetView
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
@@ -14,6 +16,25 @@ from tasks.models import Task
 from .forms import CustomUserChangeForm, UploadAvatarForm
 from .helpers import require_email_confirmation, user_has_confirmed_email_address
 from .models import CustomUser
+
+logger = logging.getLogger(__name__)
+
+
+class CustomPasswordResetView(PasswordResetView):
+    """
+    Override allauth's PasswordResetView to catch email delivery exceptions
+    and show a friendly error message instead of crashing with a 500.
+    """
+
+    def form_valid(self, form):
+        try:
+            return super().form_valid(form)
+        except Exception as e:
+            logger.error("Password reset email failed: %s", str(e), exc_info=True)
+            messages.error(
+                self.request, _("Unable to send password reset email. Please contact support if the problem persists.")
+            )
+            return render(self.request, self.get_template_names(), self.get_context_data(form=form))
 
 
 @login_required

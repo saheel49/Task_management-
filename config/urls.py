@@ -15,6 +15,7 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+from apps.users.views import CustomPasswordResetView
 from apps.web.sitemaps import StaticViewSitemap
 
 sitemaps = {
@@ -28,7 +29,7 @@ handler500 = "apps.web.views.server_error"
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
-    # Authentication
+    path("accounts/password/reset/", CustomPasswordResetView.as_view(), name="account_reset_password"),
     path("accounts/", include("allauth.urls")),
     # Users
     path("users/", include("apps.users.urls")),
