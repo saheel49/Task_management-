@@ -77,3 +77,7 @@ make test
 
  License
 MIT
+
+Author
+Saheel Amir Haroon
+Copyright
