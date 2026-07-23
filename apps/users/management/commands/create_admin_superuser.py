@@ -1,5 +1,6 @@
 import os
 
+from allauth.account.models import EmailAddress
 from django.core.management.base import BaseCommand
 
 from apps.users.models import CustomUser
@@ -15,6 +16,7 @@ def ensure_user(email, password, first_name="", last_name="", is_staff=False, is
             "is_staff": is_staff,
             "is_superuser": is_superuser,
             "user_type": "manager" if is_superuser else "employee",
+            "is_active": True,
         },
     )
 
@@ -41,8 +43,20 @@ def ensure_user(email, password, first_name="", last_name="", is_staff=False, is
         if user.user_type != ("manager" if is_superuser else "employee"):
             user.user_type = "manager" if is_superuser else "employee"
             changed = True
+        if not user.is_active:
+            user.is_active = True
+            changed = True
         if changed:
             user.save()
+
+    EmailAddress.objects.get_or_create(
+        user=user,
+        email=email,
+        defaults={
+            "verified": True,
+            "primary": True,
+        },
+    )
 
     return user, created
 

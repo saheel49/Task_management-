@@ -34,6 +34,10 @@ if [ $MIGRATION_EXIT_CODE -ne 0 ]; then
 fi
 echo "Migrations completed successfully."
 
+echo "Seeding default users..."
+python manage.py create_admin_superuser
+echo "Default users seeded."
+
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 COLLECTSTATIC_EXIT_CODE=$?
