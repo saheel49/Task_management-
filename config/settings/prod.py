@@ -53,12 +53,8 @@ USE_HTTPS_IN_ABSOLUTE_URLS = True
 
 # Auto-populate CSRF trusted origins from PROJECT_URL in production so POSTs
 # work behind Render's TLS-terminating proxy without manual per-request tuning.
-# Environment-provided CSRF_TRUSTED_ORIGINS takes precedence if explicitly set.
 if not env("CSRF_TRUSTED_ORIGINS", default=None) and PROJECT_URL and PROJECT_URL not in ("http://localhost:8000",):
     CSRF_TRUSTED_ORIGINS = [PROJECT_URL]
-
-# If you don't want to use environment variables to set production hosts you can add them here
-# ALLOWED_HOSTS = ["example.com"]
 
 # Your email config goes here.
 # see https://github.com/anymail/django-anymail for more details / examples
@@ -70,5 +66,16 @@ if not env("CSRF_TRUSTED_ORIGINS", default=None) and PROJECT_URL and PROJECT_URL
 #     "MAILGUN_API_KEY": env("MAILGUN_API_KEY", default=None),
 #     "MAILGUN_SENDER_DOMAIN": env("MAILGUN_SENDER_DOMAIN", default=None),
 # }
+
+# Force SendGrid via Anymail in production if API key is provided.
+# This overrides any SMTP backend configured in the dashboard.
+# Render free tier blocks outbound SMTP; use this to avoid that restriction.
+SENDGRID_API_KEY = env("SENDGRID_API_KEY", default=None)
+ACCOUNT_EMAIL_SUBJECT_PREFIX = ""
+if SENDGRID_API_KEY:
+    EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend"
+    ANYMAIL = {
+        "SENDGRID_API_KEY": SENDGRID_API_KEY,
+    }
 
 ADMINS = ["achinga.chris@gmail.com"]
