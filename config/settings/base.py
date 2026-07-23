@@ -367,9 +367,12 @@ REDIS_CACHE = {
     "BACKEND": "django.core.cache.backends.redis.RedisCache",
     "LOCATION": REDIS_URL,
 }
-CACHES = {
-    "default": DUMMY_CACHE if DEBUG else REDIS_CACHE,
-}
+
+# In production, only use Redis cache if REDIS_URL was explicitly provided.
+# Otherwise fall back to DummyCache to prevent crashes when Redis is unavailable
+# (e.g. Render web service without a Redis add-on).
+explicit_redis_url = env("REDIS_URL", default=None) or env("REDIS_TLS_URL", default=None)
+CACHES = {"default": DUMMY_CACHE} if DEBUG or not explicit_redis_url else {"default": REDIS_CACHE}
 
 CELERY_BROKER_URL = CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
