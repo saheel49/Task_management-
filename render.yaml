@@ -75,37 +75,21 @@ services:
       - key: EMPLOYEE_LAST_NAME
         value: User
 
-      # --- SMTP Email Configuration -------------------------------------------
-      # RENDER LIMITATION: Free/Starter Render plans block outbound SMTP
-      # (ports 25/465/587). If you see "Network is unreachable" in logs,
-      # either upgrade Render or switch to SendGrid/Mailgun below.
+      # --- Email Configuration (Anymail + SendGrid) ---------------------------
+      # RENDER FREE TIER LIMITATION: Outbound SMTP (ports 25/465/587) is blocked.
+      # Use Anymail + SendGrid API instead. SendGrid free tier: 100 emails/day.
+      # 1. Sign up at https://sendgrid.com (free)
+      # 2. Create API key with "Mail Send" permissions
+      # 3. Update SENDGRID_API_KEY below
+      #
+      # To switch back to SMTP (requires Render paid tier for outbound SMTP):
+      # - Set EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+      # - Set EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
       - key: EMAIL_BACKEND
-        value: django.core.mail.backends.smtp.EmailBackend
+        value: anymail.backends.sendgrid.EmailBackend
       - key: DEFAULT_FROM_EMAIL
         value: saheelamir49@gmail.com
       - key: SERVER_EMAIL
         value: saheelamir49@gmail.com
-      - key: EMAIL_HOST
-        value: smtp.gmail.com
-      - key: EMAIL_PORT
-        value: "587"
-      - key: EMAIL_HOST_USER
-        value: saheelamir49@gmail.com
-      - key: EMAIL_HOST_PASSWORD
-        value: <YOUR_GMAIL_APP_PASSWORD>
-      - key: EMAIL_USE_TLS
-        value: "True"
-      - key: EMAIL_USE_SSL
-        value: "False"
-
-      # --- Alternative: SendGrid via Anymail ----------------------------------
-      # If SMTP is blocked (common on Render free tier), use SendGrid API instead.
-      # 1. Sign up at https://sendgrid.com (free tier: 100 emails/day)
-      # 2. Create an API key with "Mail Send" permissions
-      # 3. Uncomment the lines below and remove the SMTP block above
-      # - key: EMAIL_BACKEND
-      #   value: anymail.backends.sendgrid.EmailBackend
-      # - key: SENDGRID_API_KEY
-      #   value: SG.xxxxxxxx
-      # - key: DEFAULT_FROM_EMAIL
-      #   value: noreply@yourdomain.com
+      - key: SENDGRID_API_KEY
+        value: SG.xxxxxxxx

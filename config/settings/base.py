@@ -313,8 +313,7 @@ SERVER_EMAIL = env("SERVER_EMAIL", default="noreply@localhost:8000")
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL", default="noreply@localhost:8000")
 
 # The default value will print emails to the console, but you can change that here
-# and in your environment. In production, set EMAIL_BACKEND to
-# "django.core.mail.backends.smtp.EmailBackend" and provide the SMTP_* vars below.
+# and in your environment.
 EMAIL_BACKEND = env("EMAIL_BACKEND", default="django.core.mail.backends.console.EmailBackend")
 
 # SMTP configuration (used when EMAIL_BACKEND is set to SMTP)
@@ -325,6 +324,16 @@ EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD", default="")
 EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
 EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)
+
+# Anymail (Mailgun/SendGrid/etc.) configuration
+# Used when EMAIL_BACKEND is set to an anymail backend, e.g.:
+#   anymail.backends.mailgun.EmailBackend
+#   anymail.backends.sendgrid.EmailBackend
+ANYMAIL = {
+    "MAILGUN_API_KEY": env("MAILGUN_API_KEY", default=None),
+    "MAILGUN_SENDER_DOMAIN": env("MAILGUN_SENDER_DOMAIN", default=None),
+    "SENDGRID_API_KEY": env("SENDGRID_API_KEY", default=None),
+}
 
 # Most production backends will require further customization. The below example uses Mailgun.
 # ANYMAIL = {
