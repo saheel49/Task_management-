@@ -4,7 +4,6 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count
 from django.shortcuts import render
-from django.urls import reverse
 
 from apps.utils.permissions import is_manager_or_superuser
 from tasks.models import Project, Task
@@ -38,18 +37,12 @@ def dashboard(request):
     active_projects = base_project_qs.filter(status="active").count()
     recent_tasks = base_task_qs.order_by("-created_at")[:5]
     recent_projects = base_project_qs.order_by("-created_at")[:5]
-    overdue_tasks = base_task_qs.filter(
-        due_date__lt=today, status__in=["todo", "progress"]
-    ).count()
-    due_today_tasks = base_task_qs.filter(
-        due_date=today, status__in=["todo", "progress"]
-    ).count()
+    overdue_tasks = base_task_qs.filter(due_date__lt=today, status__in=["todo", "progress"]).count()
+    due_today_tasks = base_task_qs.filter(due_date=today, status__in=["todo", "progress"]).count()
     due_this_week_tasks = base_task_qs.filter(
         due_date__gte=week_start, due_date__lte=week_end, status__in=["todo", "progress"]
     ).count()
-    upcoming_tasks = base_task_qs.filter(
-        due_date__gte=today, status__in=["todo", "progress"]
-    ).order_by("due_date")[:5]
+    upcoming_tasks = base_task_qs.filter(due_date__gte=today, status__in=["todo", "progress"]).order_by("due_date")[:5]
 
     completion_percentage = round((completed_tasks / total_tasks) * 100) if total_tasks > 0 else 0
 
@@ -66,9 +59,7 @@ def dashboard(request):
     }
 
     chart_data = list(
-        base_task_qs.values("created_at__date")
-        .annotate(count=Count("id"))
-        .order_by("created_at__date")[:14]
+        base_task_qs.values("created_at__date").annotate(count=Count("id")).order_by("created_at__date")[:14]
     )
 
     date_counts = {item["created_at__date"]: item["count"] for item in chart_data}

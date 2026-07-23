@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.contrib.sites.models import Site
+from django.db import OperationalError, ProgrammingError
 
 
 def get_protocol(is_secure: bool = settings.USE_HTTPS_IN_ABSOLUTE_URLS) -> str:
@@ -13,7 +14,12 @@ def get_server_root(is_secure: bool = settings.USE_HTTPS_IN_ABSOLUTE_URLS) -> st
     """
     Returns the default server root, with protocol. E.g. https://www.example.com
     """
-    return f"{get_protocol(is_secure)}://{Site.objects.get_current().domain}"
+    try:
+        domain = Site.objects.get_current().domain
+    except Site.DoesNotExist, ProgrammingError, OperationalError:
+        fallback = settings.PROJECT_METADATA.get("URL", "http://localhost:8000")
+        domain = fallback.replace("http://", "").replace("https://", "")
+    return f"{get_protocol(is_secure)}://{domain}"
 
 
 def absolute_url(relative_url: str, is_secure: bool = settings.USE_HTTPS_IN_ABSOLUTE_URLS):

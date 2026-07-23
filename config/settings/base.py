@@ -393,7 +393,10 @@ PROJECT_METADATA = {
     "NAME": gettext_lazy("Task Manager"),
     "URL": env("PROJECT_URL", default="http://localhost:8000"),
     "DESCRIPTION": gettext_lazy("Task Manager"),
-    "IMAGE": env("PROJECT_IMAGE", default="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Checkmark_green.svg/1024px-Checkmark_green.svg.png"),
+    "IMAGE": env(
+        "PROJECT_IMAGE",
+        default="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Checkmark_green.svg/1024px-Checkmark_green.svg.png",
+    ),
     "KEYWORDS": "SaaS, django",
     "CONTACT_EMAIL": env("CONTACT_EMAIL", default="noreply@localhost:8000"),
 }

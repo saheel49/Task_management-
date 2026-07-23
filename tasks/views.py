@@ -123,14 +123,18 @@ def task_detail(request, id):
         task = get_object_or_404(Task, id=id)
     else:
         task = get_object_or_404(Task, id=id, assigned_to=request.user)
-    return render(request, "tasks/task_detail.html", {
-        "task": task,
-        "breadcrumbs": [
-            {"url": reverse("dashboard:dashboard"), "label": "Dashboard"},
-            {"url": reverse("tasks:task_list"), "label": "Tasks"},
-            {"label": task.title},
-        ],
-    })
+    return render(
+        request,
+        "tasks/task_detail.html",
+        {
+            "task": task,
+            "breadcrumbs": [
+                {"url": reverse("dashboard:dashboard"), "label": "Dashboard"},
+                {"url": reverse("tasks:task_list"), "label": "Tasks"},
+                {"label": task.title},
+            ],
+        },
+    )
 
 
 @login_required
@@ -159,15 +163,19 @@ def update_task(request, id):
     else:
         form = TaskForm(instance=task, user=request.user, status_only=not is_manager_or_superuser(request.user))
 
-    return render(request, "tasks/update_task.html", {
-        "task": task,
-        "form": form,
-        "breadcrumbs": [
-            {"url": reverse("dashboard:dashboard"), "label": "Dashboard"},
-            {"url": reverse("tasks:task_list"), "label": "Tasks"},
-            {"label": "Edit Task"},
-        ],
-    })
+    return render(
+        request,
+        "tasks/update_task.html",
+        {
+            "task": task,
+            "form": form,
+            "breadcrumbs": [
+                {"url": reverse("dashboard:dashboard"), "label": "Dashboard"},
+                {"url": reverse("tasks:task_list"), "label": "Tasks"},
+                {"label": "Edit Task"},
+            ],
+        },
+    )
 
 
 @login_required
@@ -182,12 +190,16 @@ def delete_task(request, id):
         messages.success(request, "Task deleted successfully!")
         return redirect("tasks:task_list")
 
-    return render(request, "tasks/delete_task.html", {
-        "task": task,
-        "breadcrumbs": [
-            {"url": reverse("dashboard:dashboard"), "label": "Dashboard"},
-            {"url": reverse("tasks:task_list"), "label": "Tasks"},
-            {"url": reverse("tasks:task_detail", kwargs={"id": task.id}), "label": task.title},
-            {"label": "Delete"},
-        ],
-    })
+    return render(
+        request,
+        "tasks/delete_task.html",
+        {
+            "task": task,
+            "breadcrumbs": [
+                {"url": reverse("dashboard:dashboard"), "label": "Dashboard"},
+                {"url": reverse("tasks:task_list"), "label": "Tasks"},
+                {"url": reverse("tasks:task_detail", kwargs={"id": task.id}), "label": task.title},
+                {"label": "Delete"},
+            ],
+        },
+    )

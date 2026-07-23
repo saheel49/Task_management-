@@ -145,12 +145,16 @@ def project_delete(request, id):
         messages.success(request, "Project deleted successfully!")
         return redirect("tasks:project_list")
 
-    return render(request, "tasks/project_confirm_delete.html", {
-        "project": project,
-        "breadcrumbs": [
-            {"url": reverse("dashboard:dashboard"), "label": "Dashboard"},
-            {"url": reverse("tasks:project_list"), "label": "Projects"},
-            {"url": reverse("tasks:project_detail", kwargs={"id": project.id}), "label": project.name},
-            {"label": "Delete"},
-        ],
-    })
+    return render(
+        request,
+        "tasks/project_confirm_delete.html",
+        {
+            "project": project,
+            "breadcrumbs": [
+                {"url": reverse("dashboard:dashboard"), "label": "Dashboard"},
+                {"url": reverse("tasks:project_list"), "label": "Projects"},
+                {"url": reverse("tasks:project_detail", kwargs={"id": project.id}), "label": project.name},
+                {"label": "Delete"},
+            ],
+        },
+    )

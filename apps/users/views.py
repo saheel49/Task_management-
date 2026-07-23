@@ -1,6 +1,6 @@
-from allauth.account.models import EmailAddress
 from datetime import date
 
+from allauth.account.models import EmailAddress
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
@@ -104,6 +104,7 @@ def user_list(request):
 def user_detail(request, pk):
     user = get_object_or_404(CustomUser, pk=pk, is_active=True)
     from tasks.models import Task
+
     user_tasks = Task.objects.filter(assigned_to=user).order_by("-created_at")
     return render(
         request,
@@ -120,4 +121,3 @@ def user_detail(request, pk):
             ],
         },
     )
-
