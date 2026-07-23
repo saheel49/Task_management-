@@ -26,6 +26,10 @@ services:
     # image is built but *before* any web instances are started. Kept as a safety net;
     # the web container's entrypoint also runs migrations.
     releaseCommand: python manage.py migrate --noinput
+    # Post-deploy command runs after the web service is healthy. This seeds the
+    # initial admin superuser so you can log in with the same credentials locally
+    # and in production.
+    postDeployCommand: python manage.py create_admin_superuser
     # Health check path — create this endpoint if you want Render to detect crashes
     # healthCheckPath: /health/
     envVars:
@@ -50,3 +54,11 @@ services:
         # Set this to your Render domain, e.g. https://your-app.onrender.com
         # This ensures django.contrib.sites creates the correct domain on first deploy.
         value: https://your-app.onrender.com
+      - key: ADMIN_EMAIL
+        value: admin@example.com
+      - key: ADMIN_PASSWORD
+        generateValue: true
+      - key: ADMIN_FIRST_NAME
+        value: Admin
+      - key: ADMIN_LAST_NAME
+        value: User
