@@ -31,16 +31,16 @@ class Command(BaseCommand):
             },
         )
 
-        if not created:
-            self.stdout.write(f"Superuser '{email}' already exists. Updating password.")
+        if created:
+            user.set_password(password)
+            user.save()
+            self.stdout.write(self.style.SUCCESS(f"Created superuser '{email}'"))
+        else:
             user.is_staff = True
             user.is_superuser = True
             user.first_name = first_name
             user.last_name = last_name
             user.save()
-        else:
-            user.set_password(password)
-            user.save()
-            self.stdout.write(self.style.SUCCESS(f"Created superuser '{email}'"))
+            self.stdout.write(f"Superuser '{email}' already exists. Ensuring admin flags are set.")
 
         self.stdout.write(self.style.SUCCESS("Superuser is ready for production login."))
