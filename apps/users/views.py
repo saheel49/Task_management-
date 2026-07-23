@@ -63,6 +63,7 @@ def profile(request):
                 if email_address:
                     email_address.set_as_primary()
             messages.success(request, _("Profile successfully saved."))
+            request.user.refresh_from_db()
     else:
         form = CustomUserChangeForm(instance=request.user)
 
