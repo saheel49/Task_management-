@@ -60,4 +60,14 @@
 
 {% block page_js %}
 {% vite_asset 'assets/javascript/app.js' %}
+{% if saved %}
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const avatarPreview = document.getElementById("avatar-preview");
+    if (avatarPreview && avatarPreview.dataset.newSrc) {
+        avatarPreview.src = avatarPreview.dataset.newSrc;
+    }
+});
+</script>
+{% endif %}
 {% endblock %}

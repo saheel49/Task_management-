@@ -11,7 +11,7 @@
                 <img
                     id="avatar-preview"
                     class="avatar rounded-full w-40 h-40 mx-auto border-4 border-primary object-cover transition hover:scale-105 hover:opacity-80"
-                    src="{{ user.avatar_url }}"
+                    src="{{ user.avatar_url }}{% if user.avatar %}?v={{ user.pk }}{% endif %}"
                     alt="Profile Picture"
                 >
             </label>
@@ -114,6 +114,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         reader.onload = function(e){
             avatarPreview.src = e.target.result;
+            avatarPreview.dataset.newSrc = e.target.result;
         };
 
         reader.readAsDataURL(file);

@@ -9,6 +9,7 @@ from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
+from django.views.static import serve
 from drf_spectacular.views import (
     SpectacularAPIView,
     SpectacularRedocView,
@@ -31,15 +32,10 @@ urlpatterns = [
     path("sitemap.xml", sitemap, {"sitemaps": sitemaps}, name="django.contrib.sitemaps.views.sitemap"),
     path("accounts/password/reset/", CustomPasswordResetView.as_view(), name="account_reset_password"),
     path("accounts/", include("allauth.urls")),
-    # Users
     path("users/", include("apps.users.urls")),
-    # Dashboard
     path("dashboard/", include("apps.dashboard.urls")),
-    # Website
     path("", include("apps.web.urls")),
-    # Celery Progress
     path("celery-progress/", include("celery_progress.urls")),
-    # API Schema
     path(
         "api/schema/",
         SpectacularAPIView.as_view(),
@@ -55,20 +51,18 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-    # Tasks
     path("tasks/", include("tasks.urls")),
 ]
 
-# Serve uploaded media files
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
-# Browser reload
-if "django_browser_reload.middleware.BrowserReloadMiddleware" in settings.MIDDLEWARE:
-    urlpatterns.insert(
-        0,
-        path("__reload__/", include("django_browser_reload.urls")),
-    )
-
-# Debug toolbar
-if settings.ENABLE_DEBUG_TOOLBAR:
-    urlpatterns.append(path("__debug__/", include("debug_toolbar.urls")))
+# Serve uploaded media files in both development and production.
+# In production, WhiteNoise handles STATIC_URL; MEDIA_URL needs an explicit route.
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+else:
+    urlpatterns += [
+        path(
+            settings.MEDIA_URL.lstrip("/") + "<path:path>",
+            serve,
+            {"document_root": settings.MEDIA_ROOT, "show_indexes": False},
+        )
+    ]

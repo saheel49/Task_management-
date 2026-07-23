@@ -64,8 +64,10 @@ def profile(request):
                     email_address.set_as_primary()
             messages.success(request, _("Profile successfully saved."))
             request.user.refresh_from_db()
+            saved = True
     else:
         form = CustomUserChangeForm(instance=request.user)
+        saved = False
 
     total_assigned = Task.objects.filter(assigned_to=request.user).count()
     completed_tasks = Task.objects.filter(assigned_to=request.user, status="completed").count()
@@ -83,6 +85,7 @@ def profile(request):
             "completed_tasks": completed_tasks,
             "active_tasks": active_tasks,
             "recent_tasks": recent_tasks,
+            "saved": saved,
             "breadcrumbs": [
                 {"url": reverse("dashboard:dashboard"), "label": "Dashboard"},
                 {"label": "Profile"},
