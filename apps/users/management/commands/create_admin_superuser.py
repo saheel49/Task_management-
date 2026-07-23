@@ -67,7 +67,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         results = []
 
-        admin_email = os.environ.get("ADMIN_EMAIL", "admin@example.com")
+        admin_email = os.environ.get("ADMIN_EMAIL", "saheelamir49@gmail.com")
         admin_password = os.environ.get("ADMIN_PASSWORD", "admin")
         admin_first_name = os.environ.get("ADMIN_FIRST_NAME", "Admin")
         admin_last_name = os.environ.get("ADMIN_LAST_NAME", "User")
