@@ -325,6 +325,14 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
 EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)
 
+# If a SendGrid API key is provided, prefer Anymail's SendGrid backend.
+# This avoids SMTP entirely, which is helpful on platforms like Render that may
+# block outbound SMTP. The override happens here so any later logging shows the
+# effective backend.
+SENDGRID_API_KEY = env("SENDGRID_API_KEY", default=None)
+if SENDGRID_API_KEY:
+    EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend"
+
 # Anymail (Mailgun/SendGrid/etc.) configuration
 # Used when EMAIL_BACKEND is set to an anymail backend, e.g.:
 #   anymail.backends.mailgun.EmailBackend
@@ -360,6 +368,21 @@ logger.info(
     EMAIL_USE_SSL,
     EMAIL_TIMEOUT,
 )
+
+# Warn loudly in production if the effective backend is still SMTP. Render Free/Starter
+# blocks outbound SMTP, so any password reset or email-sending feature will fail with
+# `Network is unreachable`. This log line is intentional: it surfaces the misconfiguration
+# even before the first request hits Django.
+if not DEBUG and EMAIL_BACKEND in (
+    "django.core.mail.backends.smtp.EmailBackend",
+    "django.core.mail.backends.console.EmailBackend",
+):
+    logger.warning(
+        "EMAIL_BACKEND is %s in production. Outbound SMTP may be blocked by Render. "
+        "Set SENDGRID_API_KEY or EMAIL_BACKEND=anymail.backends.sendgrid.EmailBackend "
+        "to enable email delivery.",
+        EMAIL_BACKEND,
+    )
 
 EMAIL_SUBJECT_PREFIX = "[Task Manager] "
 

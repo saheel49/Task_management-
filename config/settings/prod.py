@@ -67,15 +67,6 @@ if not env("CSRF_TRUSTED_ORIGINS", default=None) and PROJECT_URL and PROJECT_URL
 #     "MAILGUN_SENDER_DOMAIN": env("MAILGUN_SENDER_DOMAIN", default=None),
 # }
 
-# Force SendGrid via Anymail in production if API key is provided.
-# This overrides any SMTP backend configured in the dashboard.
-# Render free tier blocks outbound SMTP; use this to avoid that restriction.
-SENDGRID_API_KEY = env("SENDGRID_API_KEY", default=None)
 ACCOUNT_EMAIL_SUBJECT_PREFIX = ""
-if SENDGRID_API_KEY:
-    EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend"
-    ANYMAIL = {
-        "SENDGRID_API_KEY": SENDGRID_API_KEY,
-    }
 
 ADMINS = ["achinga.chris@gmail.com"]

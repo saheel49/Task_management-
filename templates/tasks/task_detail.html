@@ -50,6 +50,10 @@ Task Details
             <a href="{% url 'tasks:update_task' task.id %}" class="btn btn-warning btn-sm">Edit</a>
             <a href="{% url 'tasks:delete_task' task.id %}" class="btn btn-error btn-sm">Delete</a>
         </div>
+        {% else %}
+        <div class="flex flex-wrap gap-3 mt-4">
+            <a href="{% url 'tasks:update_task' task.id %}" class="btn btn-primary btn-sm">Update Progress / Add Attachment</a>
+        </div>
         {% endif %}
 
         {% if task.due_date %}
