@@ -1,16 +1,30 @@
 {% load i18n %}
-<div class="dropdown dropdown-end">
-  <div tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-80 max-h-96 overflow-y-auto">
-    {% if notifications %}
-      {% for notification in notifications %}
-      <div class="p-2 hover:bg-base-200 rounded-lg cursor-pointer" hx-post="{% url 'notifications:mark_notification_read' notification.id %}" hx-swap="outerHTML">
-        <div class="font-semibold text-sm">{{ notification.verb }}</div>
-        <div class="text-xs text-base-content/70">{{ notification.description }}</div>
-        <div class="text-xs text-base-content/50 mt-1">{{ notification.created_at|date:"M d, Y H:i" }}</div>
-      </div>
-      {% endfor %}
-    {% else %}
-      <div class="p-4 text-center text-base-content/60">{% translate "No new notifications" %}</div>
-    {% endif %}
-  </div>
+<div class="menu menu-sm shadow bg-base-100 rounded-box w-80 max-h-96 overflow-y-auto p-2">
+  {% if notifications %}
+    {% for notification in notifications %}
+    <a href="{% if notification.related_task %}{% url 'tasks:task_detail' notification.related_task.id %}{% else %}{% url 'tasks:task_list' %}{% endif %}"
+       onclick="
+         event.preventDefault();
+         fetch('{% url 'notifications:mark_notification_read' notification.id %}', {
+           method: 'POST',
+           headers: {
+             'X-CSRFToken': '{{ csrf_token }}',
+             'X-Requested-With': 'XMLHttpRequest'
+           }
+         }).then(function() {
+           window.location.href = this.href;
+         }.bind(this));
+       "
+       class="p-2 hover:bg-base-200 rounded-lg cursor-pointer block">
+      <div class="font-semibold text-sm">{{ notification.verb }}</div>
+      <div class="text-xs text-base-content/70">{{ notification.description }}</div>
+      {% if notification.related_task %}
+      <div class="text-xs text-primary mt-1">Task: {{ notification.related_task.title }}</div>
+      {% endif %}
+      <div class="text-xs text-base-content/50 mt-1">{{ notification.created_at|date:"M d, Y H:i" }}</div>
+    </a>
+    {% endfor %}
+  {% else %}
+    <div class="p-4 text-center text-base-content/60">{% translate "No new notifications" %}</div>
+  {% endif %}
 </div>

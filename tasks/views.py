@@ -87,6 +87,35 @@ def task_list(request):
 
 
 @login_required
+def task_updates(request):
+    if not is_manager_or_superuser(request.user):
+        return HttpResponseForbidden("Permission denied.")
+
+    updates = (
+        TaskUpdate.objects.filter(task__project__manager=request.user)
+        .select_related("task", "user")
+        .order_by("-created_at")
+    )
+
+    paginator = Paginator(updates, 20)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "tasks/task_updates.html",
+        {
+            "page_obj": page_obj,
+            "breadcrumbs": [
+                {"url": reverse("dashboard:dashboard"), "label": "Dashboard"},
+                {"url": reverse("tasks:task_list"), "label": "Tasks"},
+                {"label": "Progress Updates"},
+            ],
+        },
+    )
+
+
+@login_required
 def create_task(request):
     if not is_manager_or_superuser(request.user):
         messages.error(request, "Only managers can create tasks.")
@@ -135,17 +164,23 @@ def task_detail(request, id):
         task = get_object_or_404(Task, id=id)
     else:
         task = get_object_or_404(Task, id=id, assigned_to=request.user)
+
+    context = {
+        "task": task,
+        "breadcrumbs": [
+            {"url": reverse("dashboard:dashboard"), "label": "Dashboard"},
+            {"url": reverse("tasks:task_list"), "label": "Tasks"},
+            {"label": task.title},
+        ],
+        "today": date.today(),
+    }
+    if is_manager_or_superuser(request.user):
+        context["task_updates"] = task.status_updates.select_related("user").order_by("-created_at")
+
     return render(
         request,
         "tasks/task_detail.html",
-        {
-            "task": task,
-            "breadcrumbs": [
-                {"url": reverse("dashboard:dashboard"), "label": "Dashboard"},
-                {"url": reverse("tasks:task_list"), "label": "Tasks"},
-                {"label": task.title},
-            ],
-        },
+        context,
     )
 
 

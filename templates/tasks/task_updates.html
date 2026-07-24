@@ -1,0 +1,68 @@
+{% extends "web/base.html" %}
+
+{% load static %}
+
+{% block page_title %}
+Task Progress Updates
+{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-6 py-10">
+
+    {% include 'web/components/breadcrumbs.html' with breadcrumbs=breadcrumbs %}
+
+    <h1 class="text-4xl font-bold mb-8">Task Progress Updates</h1>
+
+    {% if page_obj %}
+    <div class="space-y-4">
+        {% for update in page_obj %}
+        <div class="bg-base-100 rounded-xl shadow p-6 hover:shadow-lg transition-shadow">
+            <div class="flex items-center justify-between mb-2">
+                <div>
+                    <a href="{% url 'tasks:task_detail' update.task.id %}" class="text-xl font-bold text-primary hover:underline">{{ update.task.title }}</a>
+                    <p class="text-sm text-base-content/60">Project: {{ update.task.project.name }}</p>
+                </div>
+                <span class="text-sm text-base-content/50">{{ update.created_at|date:"M d, Y H:i" }}</span>
+            </div>
+            <div class="text-sm mb-1">
+                <span class="font-semibold">{{ update.user.get_display_name }}</span> changed status from <span class="badge badge-sm">{{ update.old_status }}</span> to <span class="badge badge-sm">{{ update.new_status }}</span>
+            </div>
+            {% if update.completion_note %}
+            <p class="text-sm text-base-content/80 mt-2">{{ update.completion_note }}</p>
+            {% endif %}
+            {% if update.attachment %}
+            <a href="{{ update.attachment.url }}" target="_blank" class="link link-primary text-sm mt-2 inline-block">View Attachment</a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="flex justify-center mt-8">
+        <div class="join">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="btn btn-sm btn-primary">«</a>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+                {% if page_obj.number == num %}
+                    <button class="btn btn-sm btn-active">{{ num }}</button>
+                {% else %}
+                    <a href="?page={{ num }}" class="btn btn-sm">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="btn btn-sm btn-primary">»</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="bg-base-100 rounded-xl shadow p-8 text-center">
+        <h2 class="text-2xl font-bold mb-3">No Updates Yet</h2>
+        <p class="text-base-content/60">There are no task progress updates from employees yet.</p>
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

@@ -61,6 +61,35 @@ Task Details
             Due: {{ task.due_date|date:"M d, Y" }}
         </p>
         {% endif %}
+
+        {% if user.is_superuser or user.user_type == "manager" %}
+        <div class="mt-8">
+            <h2 class="text-xl font-bold mb-4">Progress Updates</h2>
+            {% if task_updates %}
+                <div class="space-y-4">
+                    {% for update in task_updates %}
+                    <div class="bg-base-200 rounded-xl p-4">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="font-semibold">{{ update.user.get_display_name }}</span>
+                            <span class="text-xs text-base-content/60">{{ update.created_at|date:"M d, Y H:i" }}</span>
+                        </div>
+                        <div class="text-sm mb-1">
+                            Status changed from <span class="badge badge-sm">{{ update.old_status }}</span> to <span class="badge badge-sm">{{ update.new_status }}</span>
+                        </div>
+                        {% if update.completion_note %}
+                        <p class="text-sm text-base-content/80 mb-2">{{ update.completion_note }}</p>
+                        {% endif %}
+                        {% if update.attachment %}
+                        <a href="{{ update.attachment.url }}" target="_blank" class="link link-primary text-sm">View Attachment</a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-base-content/60">No progress updates yet.</p>
+            {% endif %}
+        </div>
+        {% endif %}
     </div>
 
 </div>

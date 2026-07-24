@@ -15,7 +15,10 @@ Tasks
     <div class="flex justify-between items-center mb-8">
         <h1 class="text-4xl font-bold">My Tasks</h1>
         {% if user.is_superuser or user.user_type == "manager" %}
-        <a href="{% url 'tasks:create_task' %}" class="btn btn-primary">+ Create Task</a>
+        <div class="flex gap-3">
+            <a href="{% url 'tasks:task_updates' %}" class="btn btn-info">Progress Updates</a>
+            <a href="{% url 'tasks:create_task' %}" class="btn btn-primary">+ Create Task</a>
+        </div>
         {% endif %}
     </div>
 
