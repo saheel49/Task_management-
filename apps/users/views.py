@@ -31,9 +31,15 @@ class CustomPasswordResetView(PasswordResetView):
             return super().form_valid(form)
         except Exception as e:
             logger.error("Password reset email failed: %s", str(e), exc_info=True)
-            messages.error(
-                self.request, _("Unable to send password reset email. Please contact support if the problem persists.")
-            )
+            error_msg = str(e)
+            if "Network is unreachable" in error_msg or "Errno 101" in error_msg:
+                user_msg = _(
+                    "Password reset emails are blocked on this server. "
+                    "Use the management command to reset your password, or contact support."
+                )
+            else:
+                user_msg = _("Unable to send password reset email. Please try again later or contact support.")
+            messages.error(self.request, user_msg)
             return render(self.request, self.get_template_names(), self.get_context_data(form=form))
 
 
