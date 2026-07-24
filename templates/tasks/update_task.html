@@ -20,7 +20,7 @@ Update Task
         </div>
         {% endif %}
 
-        <form method="POST" class="bg-base-100 shadow rounded-xl p-6">
+        <form method="POST" enctype="multipart/form-data" class="bg-base-100 shadow rounded-xl p-6">
             {% csrf_token %}
 
             {% if user.is_superuser or user.user_type == "manager" %}
@@ -80,12 +80,33 @@ Update Task
                 <label class="label"><span class="label-text font-semibold">Status</span></label>
                 {{ form.status }}
             </div>
+
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text font-semibold">Completion Note</span>
+                </label>
+                {{ form.completion_note }}
+                {% if form.completion_note.errors %}
+                <div class="text-error text-sm mt-1">{{ form.completion_note.errors.0 }}</div>
+                {% endif %}
+            </div>
             {% endif %}
+
+            <div class="form-control mb-4">
+                <label class="label">
+                    <span class="label-text font-semibold">Attachment</span>
+                </label>
+                <input type="file" name="file" class="file-input file-input-bordered w-full" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv">
+                {% if attachment_form.file.errors %}
+                <div class="text-error text-sm mt-1">{{ attachment_form.file.errors.0 }}</div>
+                {% endif %}
+                <p class="text-sm text-base-content/60 mt-1">Upload supporting files. Managers can attach documents or images.</p>
+            </div>
 
             {% if user.is_superuser or user.user_type == "manager" %}
             <button type="submit" class="btn btn-primary">Save Changes</button>
             {% else %}
-            <button type="submit" class="btn btn-primary">Update Status</button>
+            <button type="submit" class="btn btn-primary">Submit Update</button>
             {% endif %}
             <a href="{% url 'dashboard:dashboard' %}" class="btn btn-outline btn-sm ml-2">Cancel</a>
         </form>

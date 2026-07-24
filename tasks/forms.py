@@ -4,9 +4,21 @@ from django.utils.translation import gettext_lazy as _
 
 from apps.utils.permissions import is_manager_or_superuser
 
-from .models import Project, Task
+from .models import Project, Task, TaskAttachment
 
 User = get_user_model()
+
+
+class TaskAttachmentForm(forms.ModelForm):
+    file = forms.FileField(
+        label=_("Attachment"),
+        required=False,
+        help_text=_("You can upload multiple files."),
+    )
+
+    class Meta:
+        model = TaskAttachment
+        fields = ["file"]
 
 
 class TaskForm(forms.ModelForm):
@@ -19,7 +31,7 @@ class TaskForm(forms.ModelForm):
 
     class Meta:
         model = Task
-        fields = ["title", "description", "project", "priority", "status", "due_date", "assigned_to"]
+        fields = ["title", "description", "project", "priority", "status", "due_date", "assigned_to", "completion_note"]
         widgets = {
             "title": forms.TextInput(attrs={"class": "input input-bordered w-full", "required": True}),
             "description": forms.Textarea(attrs={"class": "textarea textarea-bordered w-full", "rows": 4}),
@@ -27,6 +39,7 @@ class TaskForm(forms.ModelForm):
             "priority": forms.Select(attrs={"class": "select select-bordered w-full"}),
             "status": forms.Select(attrs={"class": "select select-bordered w-full"}),
             "due_date": forms.DateInput(attrs={"class": "input input-bordered w-full", "type": "date"}),
+            "completion_note": forms.Textarea(attrs={"class": "textarea textarea-bordered w-full", "rows": 3}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -35,7 +48,7 @@ class TaskForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         if user:
             if status_only:
-                allowed_fields = ["status"]
+                allowed_fields = ["status", "completion_note"]
                 for field_name in list(self.fields.keys()):
                     if field_name not in allowed_fields:
                         self.fields.pop(field_name)

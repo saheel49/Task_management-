@@ -2,6 +2,11 @@ from django.conf import settings
 from django.db import models
 
 
+def _get_attachment_filename(instance, filename):
+    """Store attachments under task-specific folders."""
+    return f"task-attachments/{instance.task.id}/{filename}"
+
+
 class Project(models.Model):
     STATUS_CHOICES = [
         ("active", "Active"),
@@ -64,6 +69,26 @@ class Task(models.Model):
     )
     due_date = models.DateField(blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    completion_note = models.TextField(blank=True, help_text="Employee note when marking task as completed.")
 
     def __str__(self):
         return self.title
+
+
+class TaskAttachment(models.Model):
+    task = models.ForeignKey(
+        Task,
+        on_delete=models.CASCADE,
+        related_name="attachments",
+    )
+    file = models.FileField(upload_to=_get_attachment_filename)
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="task_attachments",
+    )
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Attachment for {self.task.title}"

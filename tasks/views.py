@@ -10,8 +10,8 @@ from django.urls import reverse
 
 from apps.utils.permissions import is_manager_or_superuser
 
-from .forms import TaskForm
-from .models import Project, Task
+from .forms import TaskAttachmentForm, TaskForm
+from .models import Project, Task, TaskAttachment
 
 
 @login_required
@@ -93,21 +93,32 @@ def create_task(request):
 
     if request.method == "POST":
         form = TaskForm(request.POST, user=request.user)
+        attachment_form = TaskAttachmentForm(request.POST, request.FILES)
         if form.is_valid():
             task = form.save(commit=False)
             if not form.cleaned_data.get("assigned_to"):
                 task.assigned_to = request.user
             task.save()
+            form.save_m2m()
+
+            if attachment_form.is_valid() and request.FILES.get("file"):
+                TaskAttachment.objects.create(
+                    task=task,
+                    file=request.FILES["file"],
+                    uploaded_by=request.user,
+                )
             messages.success(request, "Task created successfully!")
             return redirect("tasks:task_list")
     else:
         form = TaskForm(user=request.user)
+        attachment_form = TaskAttachmentForm()
 
     return render(
         request,
         "tasks/create_task.html",
         {
             "form": form,
+            "attachment_form": attachment_form,
             "breadcrumbs": [
                 {"url": reverse("dashboard:dashboard"), "label": "Dashboard"},
                 {"url": reverse("tasks:task_list"), "label": "Tasks"},
@@ -152,16 +163,21 @@ def update_task(request, id):
                 messages.success(request, "Task updated successfully!")
                 return redirect("tasks:task_list")
         else:
-            new_status = request.POST.get("status")
-            if new_status in dict(Task.STATUS_CHOICES):
-                task.status = new_status
-                task.save()
-                messages.success(request, "Status updated successfully!")
-            else:
-                messages.error(request, "Invalid status selected.")
-            return redirect("tasks:task_list")
+            form = TaskForm(request.POST, instance=task, user=request.user, status_only=True)
+            attachment_form = TaskAttachmentForm(request.POST, request.FILES)
+            if form.is_valid():
+                form.save()
+                if attachment_form.is_valid() and request.FILES.get("file"):
+                    TaskAttachment.objects.create(
+                        task=task,
+                        file=request.FILES["file"],
+                        uploaded_by=request.user,
+                    )
+                messages.success(request, "Task updated successfully!")
+                return redirect("tasks:task_list")
     else:
         form = TaskForm(instance=task, user=request.user, status_only=not is_manager_or_superuser(request.user))
+        attachment_form = TaskAttachmentForm()
 
     return render(
         request,
@@ -169,6 +185,7 @@ def update_task(request, id):
         {
             "task": task,
             "form": form,
+            "attachment_form": attachment_form,
             "breadcrumbs": [
                 {"url": reverse("dashboard:dashboard"), "label": "Dashboard"},
                 {"url": reverse("tasks:task_list"), "label": "Tasks"},

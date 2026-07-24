@@ -32,6 +32,10 @@ services:
     postDeployCommand: python manage.py create_admin_superuser
     # Health check path — create this endpoint if you want Render to detect crashes
     # healthCheckPath: /health/
+    disk:
+      name: media-disk
+      mountPath: /code/media
+      sizeGB: 1
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: config.settings.prod
