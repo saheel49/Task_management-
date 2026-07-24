@@ -325,33 +325,18 @@ EMAIL_USE_TLS = env.bool("EMAIL_USE_TLS", default=True)
 EMAIL_USE_SSL = env.bool("EMAIL_USE_SSL", default=False)
 EMAIL_TIMEOUT = env.int("EMAIL_TIMEOUT", default=10)
 
-# If a SendGrid API key is provided, prefer Anymail's SendGrid backend.
-# This avoids SMTP entirely, which is helpful on platforms like Render that may
-# block outbound SMTP. The override happens here so any later logging shows the
-# effective backend.
-SENDGRID_API_KEY = env("SENDGRID_API_KEY", default=None)
-if SENDGRID_API_KEY:
-    EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend"
-
 # Anymail (Mailgun/SendGrid/etc.) configuration
-# Used when EMAIL_BACKEND is set to an anymail backend, e.g.:
-#   anymail.backends.mailgun.EmailBackend
-#   anymail.backends.sendgrid.EmailBackend
+# Used when EMAIL_BACKEND is set to an anymail backend.
+# These are optional; only the key matching your backend needs to be set.
 ANYMAIL = {
     "MAILGUN_API_KEY": env("MAILGUN_API_KEY", default=None),
     "MAILGUN_SENDER_DOMAIN": env("MAILGUN_SENDER_DOMAIN", default=None),
     "SENDGRID_API_KEY": env("SENDGRID_API_KEY", default=None),
+    "POSTMARK_SERVER_TOKEN": env("POSTMARK_SERVER_TOKEN", default=None),
 }
-
-# Most production backends will require further customization. The below example uses Mailgun.
-# ANYMAIL = {
-#     "MAILGUN_API_KEY": env("MAILGUN_API_KEY", default=None),
-#     "MAILGUN_SENDER_DOMAIN": env("MAILGUN_SENDER_DOMAIN", default=None),
-# }
 
 # use in production
 # see https://github.com/anymail/django-anymail for more details/examples
-# EMAIL_BACKEND = "anymail.backends.mailgun.EmailBackend"
 
 # Log effective email configuration at startup for debugging.
 # This makes it obvious in container logs which backend/host/port are in use.
@@ -379,8 +364,7 @@ if not DEBUG and EMAIL_BACKEND in (
 ):
     logger.warning(
         "EMAIL_BACKEND is %s in production. Outbound SMTP may be blocked by Render. "
-        "Set SENDGRID_API_KEY or EMAIL_BACKEND=anymail.backends.sendgrid.EmailBackend "
-        "to enable email delivery.",
+        "Switch to an Anymail HTTPS backend such as SendGrid, Mailgun, or Postmark.",
         EMAIL_BACKEND,
     )
 

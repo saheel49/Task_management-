@@ -79,21 +79,50 @@ services:
       - key: EMPLOYEE_LAST_NAME
         value: User
 
-      # --- Email Configuration (Anymail + SendGrid) ---------------------------
+      # --- Email Configuration -------------------------------------------------
       # RENDER FREE TIER LIMITATION: Outbound SMTP (ports 25/465/587) is blocked.
-      # Use Anymail + SendGrid API instead. SendGrid free tier: 100 emails/day.
-      # 1. Sign up at https://sendgrid.com (free)
-      # 2. Create API key with "Mail Send" permissions
-      # 3. Update SENDGRID_API_KEY below
+      # You MUST use an HTTPS-based email API. Choose ONE provider below.
       #
-      # To switch back to SMTP (requires Render paid tier for outbound SMTP):
-      # - Set EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
-      # - Set EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
+      # Option A: SendGrid (free tier, no credit card required)
+      #   1. Sign up at https://sendgrid.com (free)
+      #   2. Create API key with "Mail Send" permissions
+      #   3. Set these env vars:
+      #      EMAIL_BACKEND=anymail.backends.sendgrid.EmailBackend
+      #      SENDGRID_API_KEY=SG.xxxx
+      #
+      # Option B: Mailgun (free tier, requires credit card)
+      #   EMAIL_BACKEND=anymail.backends.mailgun.EmailBackend
+      #   MAILGUN_API_KEY=key-xxxx
+      #   MAILGUN_SENDER_DOMAIN=yourdomain.com
+      #
+      # Option C: Postmark (free tier: 100 emails/month)
+      #   EMAIL_BACKEND=anymail.backends.postmark.EmailBackend
+      #   POSTMARK_SERVER_TOKEN=xxxx
+      #
+      # Option D: Upgrade Render to paid tier and use SMTP
+      #   EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+      #   EMAIL_HOST=smtp.gmail.com
+      #   EMAIL_PORT=587
+      #   EMAIL_USE_TLS=True
+      #   EMAIL_HOST_USER=your-email@gmail.com
+      #   EMAIL_HOST_PASSWORD=your-app-password
+      #
+      # Defaults shown are for Gmail SMTP; replace with your chosen provider.
       - key: EMAIL_BACKEND
-        value: anymail.backends.sendgrid.EmailBackend
+        value: django.core.mail.backends.console.EmailBackend
       - key: DEFAULT_FROM_EMAIL
         value: saheelamir49@gmail.com
       - key: SERVER_EMAIL
         value: saheelamir49@gmail.com
-      - key: SENDGRID_API_KEY
-        value: SG.xxxxxxxx
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_HOST_USER
+        value: saheelamir49@gmail.com
+      - key: EMAIL_HOST_PASSWORD
+        value: ""
+      - key: EMAIL_USE_TLS
+        value: "True"
+      - key: EMAIL_USE_SSL
+        value: "False"
