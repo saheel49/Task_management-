@@ -79,6 +79,7 @@ PROJECT_APPS = [
     "apps.web",
     "tasks.apps.TasksConfig",
     "apps.dashboard.apps.DashboardConfig",
+    "apps.notifications.apps.NotificationsConfig",
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 

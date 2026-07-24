@@ -1,0 +1,16 @@
+{% load i18n %}
+<div class="dropdown dropdown-end">
+  <div tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-80 max-h-96 overflow-y-auto">
+    {% if notifications %}
+      {% for notification in notifications %}
+      <div class="p-2 hover:bg-base-200 rounded-lg cursor-pointer" hx-post="{% url 'notifications:mark_notification_read' notification.id %}" hx-swap="outerHTML">
+        <div class="font-semibold text-sm">{{ notification.verb }}</div>
+        <div class="text-xs text-base-content/70">{{ notification.description }}</div>
+        <div class="text-xs text-base-content/50 mt-1">{{ notification.created_at|date:"M d, Y H:i" }}</div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="p-4 text-center text-base-content/60">{% translate "No new notifications" %}</div>
+    {% endif %}
+  </div>
+</div>

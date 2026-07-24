@@ -1,5 +1,7 @@
 from django.contrib import admin
 
+from apps.notifications.admin import TaskUpdateInline
+
 from .models import Project, Task
 
 
@@ -49,3 +51,4 @@ class TaskAdmin(admin.ModelAdmin):
     )
     ordering = ("-created_at",)
     readonly_fields = ("created_at",)
+    inlines = [TaskUpdateInline]

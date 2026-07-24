@@ -8,6 +8,7 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 
+from apps.notifications.models import Notification, TaskUpdate
 from apps.utils.permissions import is_manager_or_superuser
 
 from .forms import TaskAttachmentForm, TaskForm
@@ -163,16 +164,43 @@ def update_task(request, id):
                 messages.success(request, "Task updated successfully!")
                 return redirect("tasks:task_list")
         else:
+            old_status = task.status
             form = TaskForm(request.POST, instance=task, user=request.user, status_only=True)
             attachment_form = TaskAttachmentForm(request.POST, request.FILES)
             if form.is_valid():
                 form.save()
+                new_status = form.cleaned_data.get("status", old_status)
+                completion_note = form.cleaned_data.get("completion_note", "")
+
+                if old_status != new_status or completion_note:
+                    TaskUpdate.objects.create(
+                        task=task,
+                        user=request.user,
+                        old_status=old_status,
+                        new_status=new_status,
+                        completion_note=completion_note,
+                        attachment=request.FILES.get("file") if request.FILES.get("file") else None,
+                    )
+
                 if attachment_form.is_valid() and request.FILES.get("file"):
                     TaskAttachment.objects.create(
                         task=task,
                         file=request.FILES["file"],
                         uploaded_by=request.user,
                     )
+
+                if task.project and task.project.manager and task.project.manager != request.user:
+                    Notification.objects.create(
+                        user=task.project.manager,
+                        actor=request.user,
+                        verb="Task Updated",
+                        description=(
+                            f"{request.user.get_display_name()} updated task "
+                            f"'{task.title}' from {old_status} to {new_status}"
+                        ),
+                        related_task=task,
+                    )
+
                 messages.success(request, "Task updated successfully!")
                 return redirect("tasks:task_list")
     else:

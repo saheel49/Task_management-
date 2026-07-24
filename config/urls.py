@@ -36,6 +36,7 @@ urlpatterns = [
     path("dashboard/", include("apps.dashboard.urls")),
     path("", include("apps.web.urls")),
     path("celery-progress/", include("celery_progress.urls")),
+    path("notifications/", include("apps.notifications.urls")),
     path(
         "api/schema/",
         SpectacularAPIView.as_view(),

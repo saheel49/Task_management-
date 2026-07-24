@@ -113,6 +113,28 @@
             navigator.serviceWorker.register("{% static 'sw.js' %}");
         });
     }
+
+    // Update notification badge count periodically and after clicking the notification bell
+    function updateNotificationCount() {
+        fetch("{% url 'notifications:unread_count' %}")
+            .then(response => response.json())
+            .then(data => {
+                const badge = document.getElementById("notification-badge");
+                if (!badge) return;
+                if (data.count > 0) {
+                    badge.textContent = data.count > 99 ? "99+" : data.count;
+                    badge.style.display = "inline-flex";
+                } else {
+                    badge.style.display = "none";
+                }
+            })
+            .catch(() => {});
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        updateNotificationCount();
+        setInterval(updateNotificationCount, 30000);
+    });
 </script>
 </body>
 </html>
